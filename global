@@ -18,8 +18,8 @@ CROND=cron                        # name cron daemon, e.g., cron, crond
 # Parameters: <WAN name> <ping wait> <ping count> <packet size> <fail count> <restore delay>
 #NOTE: CONFIG suffix must match WANLIST below
 
-CONFIGwan1="wan1 5 1 56 6 60"        # linkd config parameters for wan1
-CONFIGwan2="wan2 5 1 56 6 60"        # linkd config parameters for wan2
+CONFIGwan1="wan1 3 1 56 2 60"        # linkd config parameters for wan1
+CONFIGwan2="wan2 3 1 56 2 60"        # linkd config parameters for wan2
 
 #NOTE: HBRATE suffix must match WANLIST below
 
@@ -74,8 +74,8 @@ LOG_INFO=6        # informational
 LOG_DEBUG=7       # debug-level messages
 
 if [ -z $LOGOVERRIDE ]; then  # check log levels override, see NOTE 1 below...
-  LOGLEVEL=$LOG_INFO   # Default LOGLEVEL, can override in scripts
-  FILELEVEL=$LOG_INFO  # Default file log level, can override in scripts
+  LOGLEVEL=$LOG_DEBUG   # Default LOGLEVEL, can override in scripts
+  FILELEVEL=$LOG_DEBUG  # Default file log level, can override in scripts
 fi
 
 if [ ! -f $LOGFILE ] && [ $FILELEVEL -ne $LOG_DISABLE ]; then
