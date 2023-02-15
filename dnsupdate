@@ -1,0 +1,10 @@
+#!/bin/sh
+##############################################################################
+# Updates resolv.conf to use configured name servers instead of
+#   DHCP-supplied name servers
+#
+# Author: David Medders
+# Editor: Maxwell Kapral
+##############################################################################
+
+echo "nameserver `nvram get wan_dns`" > /etc/resolv.conf

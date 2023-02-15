@@ -1,0 +1,60 @@
+#!/bin/sh
+#############################################################################
+# sendstatus: send status events
+#
+# Must set the following in nvram: email_server, email_user, email_password,
+#   and email_dest
+#
+# NOTE: Set email_dest to a list separated by spaces not commas.
+#       Messages are processed individually to each address because T-Mobile
+#       now blocks text messages delivered via e-mail with multiple recipients.
+#
+#       This version is for newer DD-WRT versions, e.g., 24345M
+#
+# Author: David Medders
+#############################################################################
+
+
+. /jffs/scripts/wan/global
+
+#LOGLEVEL=$LOG_DEBUG   # overriding LOGLEVEL
+#FILELEVEL=$LOGLEVEL
+
+if [ $# -ne 2 ]; then
+  echo "$BN: usage <subject> <message>"
+  exit 1
+fi
+
+wanlogger $LOG_DEBUG "$BN: $1 $2"
+
+SERVER=$(nvram get email_server)
+USER=$(nvram get email_user)
+PASSWORD=$(nvram get email_passwd)
+DESTS=$(nvram get email_dest)
+HOST=$(nvram get router_name).$(nvram get wan_get_domain)
+FROM=root@$HOST
+NAME=root
+
+WANIF=`ip route | head -1 | cut -f5 -d' '`
+WANIP=`ip route | grep $WANIF | grep src | awk '{print $9}'`
+SRCDOMAIN=`nslookup $WANIP | tail -1 | cut -f4 -d' '`
+
+#exit 1  # kill messages
+
+
+if [ "$SRCDOMAIN" = "" ]; then
+  SRCDOMAIN=$HOST
+fi
+
+for DEST in $DESTS; do
+
+  sendmail -S${SERVER} -f${FROM} -d${SRCDOMAIN} \
+   -au${USER} -ap${PASSWORD} $DEST <<EOF
+Subject: $1
+
+$2
+
+EOF
+
+done
+

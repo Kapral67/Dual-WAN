@@ -1,0 +1,42 @@
+#!/bin/sh
+############################################################################
+# linkup forces up a link that is in recovering state
+#
+# Author: David Medders
+############################################################################
+
+. /jffs/scripts/wan/global
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $BN <WAN name>"
+  exit 1
+fi
+
+STATFILE=$TMPDIR/$STATROOT.$1
+
+if [ -f $STATFILE ]; then   # check that status file exists
+  WANSTAT=`cat $STATFILE | cut -f1 -d' '`
+  
+  if [ $WANSTAT = "recovering" ]; then
+    PIDFILE=$PIDDIR/linkd${1}.pid
+    
+    ps | grep `cat $PIDFILE` | grep "linkd $1" >/dev/null
+    if [ $? -eq 0 ]; then   # linkd found, okay to send SIGUSR1
+      kill -SIGUSR1 `cat $PIDFILE`
+      rm $STATFILE
+      RETVAL=0
+    else
+      echo "$BN: linkd process not found"
+      RETVAL=1
+    fi
+  else
+    echo "$BN: $1 in $WANSTAT status, state not changed"
+    RETVAL=2
+  fi
+else
+  echo "$BN: Status file not found for $1"
+  RETVAL=3
+fi
+ 
+exit $RETVAL
+

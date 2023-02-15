@@ -1,0 +1,123 @@
+#!/bin/sh
+#########################################################################
+#
+# configure WAN routes
+#
+# parameters:
+#   default: standard WAN and WAN2 routing
+#   wan1: all traffic to WAN
+#   wan2: all traffic to WAN2
+#
+# Author: David Medders
+# Editor: Maxwell Kapral
+#########################################################################
+
+. /jffs/scripts/wan/global
+
+#LOGLEVEL=$LOG_DEBUG   # overriding LOGLEVEL
+#FILELEVEL=$LOGLEVEL
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $BN <default|wan|wan2>"
+  wanlogger $LOG_ERR "Usage: $BN <default|wan|wan2>"
+  exit 1
+fi
+
+tableroutes() {
+  route delete default
+  
+  TABLEROUTE=`ip route show table 100 | grep default`
+  if [ -n "$TABLEROUTE" ]; then
+    ROUTEIP=`echo $TABLEROUTE | cut -d ' ' -f3`
+    ROUTEIF=`echo $TABLEROUTE | cut -d ' ' -f5`
+    ip route delete via $ROUTEIP dev $ROUTEIF table 100
+  fi
+  
+  TABLEROUTE=`ip route show table 200 | grep default`
+  if [ -n "$TABLEROUTE" ]; then
+    ROUTEIP=`echo $TABLEROUTE | cut -d ' ' -f3`
+    ROUTEIF=`echo $TABLEROUTE | cut -d ' ' -f5`
+    ip route delete via $ROUTEIP dev $ROUTEIF table 200
+  fi
+}
+
+case $1 in
+  "default" )
+    wanlogger $LOG_NOTICE "$BN: configuring $1 routing #07 $1 "
+
+    tableroutes
+
+    route add default gw $(nvram get wan1_gateway)
+    ip route add default via $(nvram get wan1_gateway) \
+      dev $(nvram get wan1_ifname) table 100
+    ip route add default via $(nvram get wan2_gateway) \
+      dev $(nvram get wan2_ifname) table 200
+	      
+    RETVAL=0
+    ;;
+  "wan1" )
+    wanlogger $LOG_NOTICE "$BN: routing all traffic to $1 #07 $1 "
+
+    tableroutes
+
+    route add default gw $(nvram get wan1_gateway)
+    ip route add default via $(nvram get wan1_gateway) \
+      dev $(nvram get wan1_ifname) table 100
+    ip route add default via $(nvram get wan1_gateway) \
+      dev $(nvram get wan1_ifname) table 200
+
+    RETVAL=0
+    ;;
+  "wan2" )
+    wanlogger $LOG_NOTICE "$BN: routing all traffic to $1 #07 $1 "
+
+    tableroutes
+
+    route add default gw $(nvram get wan2_gateway)
+    ip route add default via $(nvram get wan2_gateway) \
+      dev $(nvram get wan2_ifname) table 100
+    ip route add default via $(nvram get wan2_gateway) \
+      dev $(nvram get wan2_ifname) table 200
+
+    RETVAL=0
+    ;;
+  * )
+    echo "$BN: Unrecognized selection: $1"
+    wanlogger $LOG_ERR "$BN: Unrecognized selection: $1"
+    RETVAL=1
+    ;;
+esac
+
+ROUTEIPS=$(nvram get route_ips)              # route test IP addresses
+
+if [ $RETVAL -eq 0 ]; then
+  # add routes for route status checks
+  for WAN in $WANLIST; do
+    for ROUTEIP in $ROUTEIPS; do
+      route delete -host $ROUTEIP `nvram get ${WAN}_ifname`
+    done
+  done
+  
+  for WAN in $WANLIST; do
+    for ROUTEIP in $ROUTEIPS; do
+      route add -host $ROUTEIP \
+        gw `nvram get ${WAN}_gateway` `nvram get ${WAN}_ifname`
+    done                    
+  done
+
+  # add route for Grande router segment
+  route delete -net 192.168.100.0 netmask 255.255.255.0
+  route add -net 192.168.100.0 netmask 255.255.255.0 \
+    gw $(nvram get wan1_gateway)
+
+  ip route flush cache
+  
+  echo "$1 `date '+%d%b%g %H%M%S'`" > $ROUTESTATFILE
+  
+  wanlogger $LOG_NOTICE "$BN: route set to $1"
+
+  $DNSUPDATE
+fi
+
+exit $RETVAL
+

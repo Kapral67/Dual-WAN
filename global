@@ -1,0 +1,103 @@
+#########################################################################
+# global variables and functions for WAN management scripts
+#
+# Author: David Medders
+# Editor: Maxwell Kapral
+#########################################################################
+
+[ ! -z "$DEBUG" ] && set -x
+
+#########################################################################
+# network configuration used by monitord
+#########################################################################
+CHECKRATE=30                      # delay between monitord check cycles (sec)
+CRONALARMTIME=90                  # time until cron alarm issued (sec)
+CROND=cron                        # name cron daemon, e.g., cron, crond
+
+# linkd configuration strings, used in monitord
+# Parameters: <WAN name> <ping wait> <ping count> <packet size> <fail count> <restore delay>
+#NOTE: CONFIG suffix must match WANLIST below
+
+CONFIGwan1="wan1 5 1 56 6 60"        # linkd config parameters for wan1
+CONFIGwan2="wan2 5 1 56 6 60"        # linkd config parameters for wan2
+
+#NOTE: HBRATE suffix must match WANLIST below
+
+HBRATEwan1=20                     # WAN heartbeat check rate (sec)
+HBRATEwan2=20                     # WAN2 heartbeat check rate (sec)
+
+WANLIST="wan1 wan2"               # list of monitored wan names
+BASEWAN=""                        # base wan configurated by dd-wrt
+
+#STATICWANLIST=                   # list static IP wan interfaces (exclude wan)
+
+#NOTE: DHCPLIST is for DHCP VLANs only, use a "" list for no DHCP
+#      Use a "" BASEVLAN list if the dd-wrt configured WAN is not DHCP
+
+DHCPLIST="vlan2 vlan3"            # list of DHCP VLANs
+BASEDHCP=""                       # base VLAN configurated by dd-wrt
+
+#########################################################################
+# directory and file configuration
+#########################################################################
+WANDIR=/jffs/scripts/wan             # location of WAN management scripts
+TMPDIR=/tmp/wan                      # temporary directory
+PIDDIR=/var/run                      # directory for PID files
+STATROOT=status                      # status filename root
+HBROOT=heartbeat	                 # heartbeat filename root
+ROUTESTATFILE=$TMPDIR/status.route   # route status file
+CHANGEWAN=$WANDIR/changewan          # script for WAN state change
+CONFIGROUTES=$WANDIR/configroutes    # script to configure routes
+FIREWALL=$WANDIR/firewall            # script to configure firewall
+LINKDUPDATE=$WANDIR/linkdupdate      # script to update linkd parameters
+SENDSTATUS=$WANDIR/sendstatus        # script to send event status
+DNSUPDATE=$WANDIR/dnsupdate          # update /etc/resolv.conf
+DDNSUPDATE=$WANDIR/ddnsupdate        # update dyndns
+LOGFILE=$TMPDIR/wan.log              # log file for wanlogger
+BN=`basename $0`                     # script name for logging
+LOGMAXSIZE=1000000                   # maximum log size in bytes
+LOGDAYS=10                           # number of days to retain
+#########################################################################
+
+if [ ! -d $TMPDIR ]; then   # mkdir TMPDIR if it does not exist
+  mkdir -p $TMPDIR
+fi
+
+LOG_DISABLE=-1    # disable system logging
+LOG_EMERG=0       # system is unusable
+LOG_ALERT=1       # action must be taken immediately
+LOG_CRIT=2        # critical conditions
+LOG_ERR=3         # error conditions
+LOG_WARNING=4     # warning conditions
+LOG_NOTICE=5      # normal but significant condition
+LOG_INFO=6        # informational
+LOG_DEBUG=7       # debug-level messages
+
+if [ -z $LOGOVERRIDE ]; then  # check log levels override, see NOTE 1 below...
+  LOGLEVEL=$LOG_INFO   # Default LOGLEVEL, can override in scripts
+  FILELEVEL=$LOG_INFO  # Default file log level, can override in scripts
+fi
+
+if [ ! -f $LOGFILE ] && [ $FILELEVEL -ne $LOG_DISABLE ]; then
+  touch $LOGFILE
+fi
+
+wanlogger () {    # usage: wanlogger <level> <message>
+  if [ $LOGLEVEL -ge $1 ]; then
+    logger $2
+  fi
+  
+  if [ $FILELEVEL -ge $1 ]; then
+    LFSIZE=`ls -l $LOGFILE | awk '{print $5}'`
+    
+    if [ $LFSIZE -le $LOGMAXSIZE ]; then  # stop when max log size reached
+      echo "`date '+%b %d %H:%M:%S'` $2" >> $LOGFILE
+    fi
+  fi
+}
+
+#########################################################################
+# NOTE 1: LOGOVERRIDE is used to protect overridden logging levels when
+#         global is re-read.  It is not required when global is read only
+#         once in a script, e.g., linkd, monitord.
+#########################################################################

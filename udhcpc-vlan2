@@ -1,0 +1,105 @@
+#!/bin/sh
+###########################################################################
+# udhcpc script for WAN2
+#
+# Author: David Medders
+# Editor: Maxwell Kapral
+###########################################################################
+
+. /jffs/scripts/wan/global
+
+#LOGLEVEL=$LOG_DEBUG   # override LOGLEVEL
+#FILELEVEL=$LOGLEVEL
+
+WAN=wan1    # WAN name
+
+if [ -z "$1" ]; then
+  wanlogger $LOG_WARNING "$BN ERROR: should be called from udhcpc"
+  exit 1
+fi
+
+ifconfig $interface up
+
+wanlogger $LOG_DEBUG "$BN: start $1, $ip, $router, $interface, $dns, $$"
+
+CUR_IP=`nvram get ${WAN}_ipaddr`
+CUR_GW=`nvram get ${WAN}_gateway`
+
+if [ $ip != $CUR_IP ] || \
+  [ $router != $CUR_GW ]; then
+  wanlogger $LOG_INFO "$BN: config change ip $ip $CUR_IP, gateway $router $CUR_GW"
+fi
+
+if [ ! -z $ip ] && [ $ip = $router ]; then  # see Note 1 below
+  wanlogger $LOG_ERR "$BN: config change error gateway ip $ip, correcting to $CUR_GW"
+  $SENDSTATUS "DHCP config error" "$BN: Gateway corrected - changed from $router to $CUR_GW" &
+  router=$CUR_GW
+fi
+
+case "$1" in
+  deconfig)
+# runs every 10 minutes, don't want to drop interface unnecessarily
+#    wanlogger $LOG_DEBUG "$BN: $interface deconfig"
+#    route delete -net 172.16.1.0 netmask 255.255.255.0 gw $ip
+#    /sbin/ifconfig $interface 0.0.0.0
+    ;;
+
+  renew|bound)
+    wanlogger $LOG_DEBUG "$BN: renew|bound $interface $ip gw $router"
+    
+    CFGIP=`ifconfig $interface|grep inet| cut -d: -f2|cut -d' ' -f1`
+    
+    wanlogger $LOG_DEBUG "$BN: configured IP $CFGIP"
+
+    if [ "$CFGIP" != "$ip" ] || [ -z $ip ] || [ $ip != $CUR_IP ] \
+      || [ $route != $CUR_GW ]; then
+      wanlogger $LOG_INFO "$BN: IP new - $ip $CUR_IP, GW new - $router $CUR_GW"
+      
+      ifconfig $interface 0.0.0.0
+      
+      ifconfig $interface $ip netmask $subnet up
+      
+      if [ $ip != $CUR_IP ]; then
+        nvram set ddns2_time=0
+      fi
+    
+      nvram set ${WAN}_ifname=$interface
+      nvram set ${WAN}_gateway=$router
+      nvram set ${WAN}_ipaddr=$ip
+      nvram set ${WAN}_netmask=$subnet
+      nvram set ${WAN}_broadcast=$broadcast
+      nvram commit
+		  
+      if [ "$CFGIP" != "$ip" ]; then   # new IP, so must rerun firewall
+        $FIREWALL
+      fi
+
+      $CHANGEWAN force
+
+      $LINKDUPDATE $WAN
+      
+      $DNSUPDATE
+      
+      # send SIGUSR2 to associated linkd to force config re-read
+      LINKDPID=$PIDDIR/linkd${WAN}.pid
+      
+      ps | grep `cat $LINKDPID` | grep "linkd $WAN " >/dev/null
+      if [ $? -eq 0 ]; then  # linkd found, okay to send SIGUSR2
+        kill -SIGUSR2 `cat $LINKDPID`
+      fi
+    fi
+    ;;
+esac
+
+exit 0
+
+############################################################################
+# Note 1: This is a work-around for a Pace 5031NV. Occasionally, the 5031
+#         sends the interface IP address as the gateway.  If updated to
+#         nvram, this will have no immediate impact, but will poison the
+#         configuration for the next invocation of configroutes.  On subsequent
+#         configroutes execution, wan2 will lose all external connectivity.
+#         It will continue to pass the gateway ping test in linkd, but
+#         will fail the route test because it has no gateway to the outside
+#         world -- leaving wan2 in 'link' state.
+############################################################################

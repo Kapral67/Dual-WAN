@@ -1,0 +1,16 @@
+#!/bin/sh
+
+#set -x
+
+route -n | while read LINE; do
+  DEST=`echo $LINE | cut -f1 -d' '`
+  if [ "$DEST" = "0.0.0.0" ]; then
+    DESTIP=`echo $LINE | cut -f2 -d' '`
+    SRCDOMAIN=`nslookup $DESTIP | grep $DESTIP | grep 'Address 1'| cut -f4 -d' '`
+    if [ "$SRCDOMAIN" = "" ]; then
+      SRCDOMAIN=$DESTIP
+    fi
+    echo "DEFAULT $DESTIP $SRCDOMAIN"
+    break;
+  fi
+done

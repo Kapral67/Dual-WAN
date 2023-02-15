@@ -1,0 +1,41 @@
+#!/bin/sh
+##############################################################################
+# Initiate linkd re-read of network configuration
+#
+# Must be linked to /jffs/etc/config/linkupdate.ipup for execution when an
+#   an IP address is configured up
+#
+# Author: David Medders
+##############################################################################
+
+. /jffs/scripts/wan/global
+
+#LOGLEVEL=$LOG_DEBUG    # overriding LOGLEVEL
+#FILELEVEL=$LOGLEVEL
+
+wanupdate () {
+  WAN=$1
+  wanlogger $LOG_DEBUG "$BN: updating linkd configuration for $WAN"
+  PIDFILE=$PIDDIR/linkd${WAN}.pid
+  if [ -f $PIDFILE ]; then
+    wanlogger $LOG_DEBUG "$BN: sending SIGUSR2 to $WAN linkd"
+    echo "$BN: sending SIGUSR2 to $WAN linkd"
+    kill -SIGUSR2 `cat $PIDFILE`
+  else
+    wanlogger $LOG_DEBUG "$BN: no PID file for $WAN linkd"
+    echo "$BN: no PID file for $WAN linkd"
+  fi
+}
+
+if [ $# -eq 1 ]; then
+  wanupdate $1
+elif [ $# -eq 0 ]; then
+  for WANNAME in $WANLIST; do
+    wanupdate $WANNAME
+  done
+else
+  echo "Usage: $BN <wan>"
+  wanlogger $LOG_DEBUG "Usage: $BN <wan>"
+fi
+
+##############################################################################

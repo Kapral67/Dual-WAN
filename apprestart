@@ -1,0 +1,27 @@
+#!/bin/sh
+##########################################################################
+# Application restart script
+#
+# Author: David Medders
+##########################################################################
+
+. /jffs/scripts/wan/global
+
+APPLIST="httpd"
+
+wanlogger $LOG_DEBUG "$BN: started"
+
+for APP in $APPLIST; do
+  wanlogger $LOG_DEBUG "$BN: restarting $APP"
+  stopservice $APP
+  startservice $APP
+done
+
+wanlogger $LOG_DEBUG "$BN: complete"
+
+exit 0
+
+##########################################################################
+# Note: httpd intermittently goes to 100% CPU, cycling the daemon clears
+#       the condition.
+##########################################################################

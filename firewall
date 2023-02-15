@@ -1,0 +1,140 @@
+#!/bin/sh
+##############################################################################
+# Firewall configuration script
+#
+# Author: David Medders
+# Editor: Maxwell Kapral
+# Based on the work of John Barbieri
+##############################################################################
+
+. /jffs/scripts/wan/global
+
+#LOGLEVEL=$LOG_DEBUG   # overriding LOGLEVEL
+#FILELEVEL=$LOGLEVEL
+
+wanlogger $LOG_DEBUG "$BN: start"
+
+#DD-WRT firewall rules #BEGIN
+
+#apply simple forward rules 
+
+for WAN in $WANLIST; do
+  if [ $WAN != $BASEWAN ]; then  # ignore base wan configured by dd-wrt
+    wanlogger $LOG_DEBUG "$BN: configuring firewall PREROUTING for $WAN"
+
+    for RULE in $(nvram get forward_spec); do 
+      wanlogger $LOG_DEBUG "$BN: $WAN forward_spec $RULE"
+      FROM=`echo $RULE | cut -d '>' -f 1` 
+      TO=`echo $RULE | cut -d '>' -f 2` 
+      STATE=`echo $FROM | cut -d ':' -f 2` 
+      PROTO=`echo $FROM | cut -d ':' -f 3` 
+      SPORT=`echo $FROM | cut -d ':' -f 4` 
+      DEST=`echo $TO | cut -d ':' -f 1` 
+      DPORT=`echo $TO | cut -d ':' -f 2` 
+   
+      if [ "$STATE" = "on" ]; then 
+         if [ "$PROTO" = "both" ]; then 
+           iptables -A PREROUTING -t nat -p udp -d $(nvram get ${WAN}_ipaddr) \
+             --dport $SPORT -j DNAT --to $DEST:$DPORT 
+           iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
+             --dport $SPORT -j DNAT --to $DEST:$DPORT 
+         else 
+           iptables -A PREROUTING -t nat -p $PROTO -d $(nvram get ${WAN}_ipaddr) \
+             --dport $SPORT -j DNAT --to $DEST:$DPORT 
+         fi 
+      fi 
+    done
+
+    #apply range forward rules 
+    for RULE in $(nvram get forward_port); do 
+      wanlogger $LOG_DEBUG "$BN: $WAN forward_port $RULE"
+  
+      FROM=`echo $RULE | cut -d '>' -f 1` 
+      TO=`echo $RULE | cut -d '>' -f 2` 
+      STATE=`echo $FROM | cut -d ':' -f 2` 
+      PROTO=`echo $FROM | cut -d ':' -f 3` 
+      SPORT=`echo $FROM | cut -d ':' -f 4` 
+      EPORT=`echo $FROM | cut -d ':' -f 5`
+
+      if [ "$STATE" = "on" ]; then 
+        if [ "$PROTO" = "both" ]; then 
+          iptables -A PREROUTING -t nat -p udp -d $(nvram get ${WAN}_ipaddr) \
+            --dport $SPORT:$EPORT -j DNAT --to $TO 
+          iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
+            --dport $SPORT:$EPORT -j DNAT --to $TO 
+        else 
+          iptables -A PREROUTING -t nat -p $PROTO -d $(nvram get ${WAN}_ipaddr) \
+            --dport $SPORT:$EPORT -j DNAT --to $TO 
+        fi 
+      fi 
+    done
+
+    iptables -A PREROUTING -t nat -p icmp -d $(nvram get ${WAN}_ipaddr) -j DNAT \
+      --to $(nvram get lan_ipaddr)
+
+    if [ $(nvram get remote_management) -eq 1 ]; then 
+      iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
+        --dport $(nvram get http_wanport) -j DNAT \
+        --to $(nvram get lan_ipaddr):$(nvram get http_lanport) 
+    fi
+
+    #if [ $(nvram get dmz_enable) -eq 1 ]; then 
+    #  DMZ_IP=$(nvram get lan_ipaddr | sed -r 's/[0-9]+$//')$(nvram get dmz_ipaddr) 
+    #  iptables -A PREROUTING -t nat -d $(nvram get ${WAN}_ipaddr) -j DNAT \
+    #    --to $DMZ_IP 
+    #fi
+
+    iptables -A PREROUTING -t nat --dest $(nvram get ${WAN}_ipaddr) -j TRIGGER \
+      --trigger-type dnat 
+    iptables -A FORWARD -i $(nvram get ${WAN}_ifname) -o $(nvram get lan_ifname) \
+      -j TRIGGER --trigger-type in
+  fi
+done
+
+#DD-WRT END
+
+iptables -F POSTROUTING -t nat
+
+I=1
+for WAN in $WANLIST; do
+  iptables -t mangle -N ETH${I}
+  iptables -t mangle -F ETH${I}
+  iptables -t mangle -A ETH${I} -j MARK --set-mark 0x${I}00
+  iptables -t nat -N SPOOF_ETH${I}
+  iptables -t nat -F SPOOF_ETH${I}
+  # iptables -t nat -A SPOOF_ETH${I} -j LOG --log-prefix " SPOOF_ETH${I} "
+  iptables -t nat -A SPOOF_ETH${I} -j SNAT --to $(nvram get ${WAN}_ipaddr)
+
+  #Save the gateway in the connection mark for new incoming connections
+  iptables -I FORWARD -t mangle -i $(nvram get ${WAN}_ifname) -j MARK \
+    --set-mark 0x${I}00
+  iptables -I FORWARD -t mangle -o $(nvram get ${WAN}_ifname) -j MARK \
+    --set-mark 0x${I}00
+  iptables -A FORWARD -t mangle -j CONNMARK --save-mark
+  iptables -I INPUT -t mangle -i $(nvram get ${WAN}_ifname) -j MARK \
+    --set-mark 0x${I}00
+  iptables -A INPUT -t mangle -j CONNMARK --save-mark
+  iptables -t mangle -A PREROUTING -i $(nvram get ${WAN}_ifname) -m conntrack \
+    --ctstate NEW -j CONNMARK --set-mark 0x${I}00
+  iptables -A POSTROUTING -t mangle -o $(nvram get ${WAN}_ifname) -j MARK \
+    --set-mark 0x${I}00
+  iptables -t nat -A POSTROUTING -o $(nvram get ${WAN}_ifname) -j SPOOF_ETH${I}
+  
+  I=$(($I+1))
+done
+
+iptables -t mangle -A POSTROUTING -j CONNMARK --save-mark
+iptables -t mangle -A PREROUTING -i br0 -m state --state RELATED,ESTABLISHED \
+  -j CONNMARK --restore-mark
+
+# Use the correct gateway for reply packets from local connections
+iptables -t mangle -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED \
+  -j CONNMARK --restore-mark
+
+RP_PATH=/proc/sys/net/ipv4/conf 
+for IFACE in `ls $RP_PATH`; do
+    echo 0 > $RP_PATH/$IFACE/rp_filter 
+done
+
+wanlogger $LOG_DEBUG "$BN: exit"
+
