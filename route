@@ -47,10 +47,10 @@ wanlogger $LOG_DEBUG "$BN: Deleting default route"
 ip route delete default
 
 # route to balance traffic across wan and wan2
-ip route add default scope global equalize nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname)
+# ip route add default scope global equalize nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname)
 
 # default route for main subnet traffic
-# route add default gw $(nvram get wan1_gateway)
+route add default gw $(nvram get wan1_gateway)
 
 # add routes for route status checks
 
