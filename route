@@ -47,6 +47,10 @@ wanlogger $LOG_DEBUG "$BN: Deleting default route"
 ip route delete default
 
 # route to balance traffic across wan and wan2
+while [ ! -d "/opt/sbin" ]; do
+    wanlogger $LOG_INFO "Waiting For Entware..."
+    sleep 5
+done
 /opt/sbin/ip route add default scope global nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) weight 1 nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname) weight 1
 
 # default route for main subnet traffic
