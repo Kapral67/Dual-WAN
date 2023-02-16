@@ -12,9 +12,9 @@ udhcpc -i vlan3 -p /var/run/udhcpc-vlan3.pid -s /jffs/scripts/wan/udhcpc-vlan3
 sleep 5
 udhcpc -i vlan2 -p /var/run/udhcpc-vlan2.pid -s /jffs/scripts/wan/udhcpc-vlan2
 sleep 20
+/jffs/scripts/wan/firewall
+/jffs/scripts/wan/route
+sleep 20
 /jffs/scripts/wan/clockupdate
 /jffs/scripts/dnsupdate
 /jffs/scripts/wan/monitord &
-sleep 20
-/jffs/scripts/wan/firewall
-/jffs/scripts/wan/route
