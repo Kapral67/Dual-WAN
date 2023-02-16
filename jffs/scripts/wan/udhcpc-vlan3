@@ -18,7 +18,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-ifconfig $interface up
+ip link set dev $interface up
 
 wanlogger $LOG_DEBUG "$BN: start $1, $ip, $router, $interface, $dns, $$"
 
@@ -46,30 +46,30 @@ case "$1" in
 
   renew|bound)
     wanlogger $LOG_DEBUG "$BN: renew|bound $interface $ip gw $router"
-    
-    CFGIP=`ifconfig $interface|grep inet| cut -d: -f2|cut -d' ' -f1`
-    
+
+    CFGIP=`ip -o addr show $interface | awk '{print $4}' | cut -d '/' -f 1`
+
     wanlogger $LOG_DEBUG "$BN: configured IP $CFGIP"
 
     if [ "$CFGIP" != "$ip" ] || [ -z $ip ] || [ $ip != $CUR_IP ] \
       || [ $route != $CUR_GW ]; then
       wanlogger $LOG_INFO "$BN: IP new - $ip $CUR_IP, GW new - $router $CUR_GW"
-      
-      ifconfig $interface 0.0.0.0
-      
-      ifconfig $interface $ip netmask $subnet up
-      
+
+      ip addr flush dev $interface
+
+      ip addr add $ip/$subnet dev $interface
+
       if [ $ip != $CUR_IP ]; then
         nvram set ddns2_time=0
       fi
-    
+
       nvram set ${WAN}_ifname=$interface
       nvram set ${WAN}_gateway=$router
       nvram set ${WAN}_ipaddr=$ip
       nvram set ${WAN}_netmask=$subnet
       nvram set ${WAN}_broadcast=$broadcast
       nvram commit
-		  
+
       if [ "$CFGIP" != "$ip" ]; then   # new IP, so must rerun firewall
         $FIREWALL
       fi
@@ -77,12 +77,12 @@ case "$1" in
       $CHANGEWAN force
 
       $LINKDUPDATE $WAN
-      
+
       $DNSUPDATE
-      
+
       # send SIGUSR2 to associated linkd to force config re-read
       LINKDPID=$PIDDIR/linkd${WAN}.pid
-      
+
       ps | grep `cat $LINKDPID` | grep "linkd $WAN " >/dev/null
       if [ $? -eq 0 ]; then  # linkd found, okay to send SIGUSR2
         kill -SIGUSR2 `cat $LINKDPID`

@@ -24,7 +24,7 @@ if [ $# -ne 1 ]; then
 fi
 
 tableroutes() {
-  route delete default
+  ip route delete default
   
   TABLEROUTE=`ip route show table 100 | grep default`
   if [ -n "$TABLEROUTE" ]; then
@@ -65,7 +65,7 @@ case $1 in
 
     tableroutes
 
-    route add default gw $(nvram get wan1_gateway)
+    ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
     ip route add default via $(nvram get wan1_gateway) \
       dev $(nvram get wan1_ifname) table 100
     ip route add default via $(nvram get wan1_gateway) \
@@ -78,7 +78,7 @@ case $1 in
 
     tableroutes
 
-    route add default gw $(nvram get wan2_gateway)
+    ip route add default via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname)
     ip route add default via $(nvram get wan2_gateway) \
       dev $(nvram get wan2_ifname) table 100
     ip route add default via $(nvram get wan2_gateway) \
@@ -99,21 +99,19 @@ if [ $RETVAL -eq 0 ]; then
   # add routes for route status checks
   for WAN in $WANLIST; do
     for ROUTEIP in $ROUTEIPS; do
-      route delete -host $ROUTEIP `nvram get ${WAN}_ifname`
+      ip route del $ROUTEIP via `nvram get ${WAN}_ifname`
     done
   done
   
   for WAN in $WANLIST; do
     for ROUTEIP in $ROUTEIPS; do
-      route add -host $ROUTEIP \
-        gw `nvram get ${WAN}_gateway` `nvram get ${WAN}_ifname`
-    done                    
+      ip route add $ROUTEIP via `nvram get ${WAN}_gateway` dev `nvram get ${WAN}_ifname`
+    done
   done
 
   # add route for Grande router segment
-  route delete -net 192.168.100.0 netmask 255.255.255.0
-  route add -net 192.168.100.0 netmask 255.255.255.0 \
-    gw $(nvram get wan1_gateway)
+  ip route del 10.0.0.0/24
+  ip route add 10.0.0.0/24 via `nvram get wan2_gateway`
 
   ip route flush cache
   

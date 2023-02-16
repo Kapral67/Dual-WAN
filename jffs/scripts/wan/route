@@ -52,15 +52,6 @@ ip route add default scope global \
   nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname) weight $WEIGHTwan2
 wanlogger $LOG_INFO "$BN: Load Balancing Target"
 
-# add routes for route status checks
-
-for WAN in $WANLIST; do
-  route add -host `nvram get route_ip` gw `nvram get ${WAN}_gateway` \
-    `nvram get ${WAN}_ifname`
-  route add -host `nvram get route_ip2` gw `nvram get ${WAN}_gateway` \
-    `nvram get ${WAN}_ifname`
-done
-
 ip route flush cache
 
 echo "default `date '+%d%b%g %H%M%S'` route" > $ROUTESTATFILE  # write status
