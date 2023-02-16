@@ -85,11 +85,14 @@ if [ -f $FORCEROUTE ]; then  # a route is being forced
   wanlogger $LOG_INFO "$BN: route forced to $NEWSTAT at `date '+%d%b%g %H%M%S'`"
 else
   case $WANSTAT in   
-     15|10|5|11|7|6|3|2|1|0)
+     10|5|11|7|6|3|2|1|0)
        NEWSTAT=wan1
        ;;
      14|13|12|9|8|4)
        NEWSTAT=wan2
+       ;;
+     15)
+       NEWSTAT=default
        ;;
      *)                         # invalid state
        wanlogger $LOG_ERR "$BN: invalid WANSTAT $WANSTAT"

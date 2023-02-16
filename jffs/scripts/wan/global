@@ -58,6 +58,11 @@ BN=`basename $0`                     # script name for logging
 LOGMAXSIZE=1000000                   # maximum log size in bytes
 LOGDAYS=10                           # number of days to retain
 #########################################################################
+# Load-Balancing Weights
+#########################################################################
+WEIGHTwan1=2
+WEIGHTwan2=1
+#########################################################################
 
 if [ ! -d $TMPDIR ]; then   # mkdir TMPDIR if it does not exist
   mkdir -p $TMPDIR
