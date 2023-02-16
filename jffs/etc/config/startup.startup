@@ -1,8 +1,11 @@
 #!/bin/sh
 sleep 60
 mount --bind /jffs/etc/profile /etc/profile
+sleep 5
+source /etc/profile
+sleep 5
 mount -o bind /jffs/opt /opt
-sleep 20
+sleep 5
 /opt/etc/init.d/rc.unslung start
 sleep 5
 udhcpc -i vlan3 -p /var/run/udhcpc-vlan3.pid -s /jffs/scripts/wan/udhcpc-vlan3
