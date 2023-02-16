@@ -1,5 +1,6 @@
 #!/bin/sh
-sleep 20
+sleep 60
+mount --bind /jffs/etc/profile /etc/profile
 mount -o bind /jffs/opt /opt
 sleep 20
 /opt/etc/init.d/rc.unslung start
@@ -14,4 +15,3 @@ sleep 20
 sleep 20
 /jffs/scripts/wan/firewall
 /jffs/scripts/wan/route
-

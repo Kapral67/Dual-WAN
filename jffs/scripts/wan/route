@@ -46,16 +46,11 @@ ip route add table 200 default via $(nvram get wan2_gateway)
 wanlogger $LOG_DEBUG "$BN: Deleting default route"
 ip route delete default
 
-if [ -f "/opt/sbin/ip" ]; then
-    # route to balance traffic across wan1 & wan2
-    /opt/sbin/ip route add default scope global \
-      nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) weight $WEIGHTwan1 \
-      nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname) weight $WEIGHTwan2
-    wanlogger $LOG_INFO "$BN: Load Balancing Target"
-else
-    # default route for main subnet traffic
-    route add default gw $(nvram get wan1_gateway)
-fi
+# route to balance traffic across wan1 & wan2
+ip route add default scope global \
+  nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) weight $WEIGHTwan1 \
+  nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname) weight $WEIGHTwan2
+wanlogger $LOG_INFO "$BN: Load Balancing Target"
 
 # add routes for route status checks
 
