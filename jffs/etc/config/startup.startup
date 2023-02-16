@@ -4,6 +4,7 @@ udhcpc -i `nvram get wan1_ifname` -p /var/run/udhcpc-wan1.pid -s /jffs/scripts/w
 sleep 5
 udhcpc -i `nvram get wan2_ifname` -p /var/run/udhcpc-wan2.pid -s /jffs/scripts/wan/udhcpc-wan2
 sleep 20
+/jffs/scripts/wan/apprestart
 /jffs/scripts/wan/firewall
 /jffs/scripts/wan/route
 sleep 20
