@@ -96,15 +96,14 @@ done
 iptables -F POSTROUTING -t nat
 
 I=1
-J=0
 for WAN in $WANLIST; do
-  iptables -t mangle -N ETH${J}
-  iptables -t mangle -F ETH${J}
-  iptables -t mangle -A ETH${J} -j MARK --set-mark 0x${I}00
-  iptables -t nat -N SPOOF_ETH${J}
-  iptables -t nat -F SPOOF_ETH${J}
-  # iptables -t nat -A SPOOF_ETH${J} -j LOG --log-prefix " SPOOF_ETH${J} "
-  iptables -t nat -A SPOOF_ETH${J} -j SNAT --to $(nvram get ${WAN}_ipaddr)
+  iptables -t mangle -N ETH${I}
+  iptables -t mangle -F ETH${I}
+  iptables -t mangle -A ETH${I} -j MARK --set-mark 0x${I}00
+  iptables -t nat -N SPOOF_ETH${I}
+  iptables -t nat -F SPOOF_ETH${I}
+  # iptables -t nat -A SPOOF_ETH${I} -j LOG --log-prefix " SPOOF_ETH${I} "
+  iptables -t nat -A SPOOF_ETH${I} -j SNAT --to $(nvram get ${WAN}_ipaddr)
 
   #Save the gateway in the connection mark for new incoming connections
   iptables -I FORWARD -t mangle -i $(nvram get ${WAN}_ifname) -j MARK \
@@ -119,10 +118,9 @@ for WAN in $WANLIST; do
     --ctstate NEW -j CONNMARK --set-mark 0x${I}00
   iptables -A POSTROUTING -t mangle -o $(nvram get ${WAN}_ifname) -j MARK \
     --set-mark 0x${I}00
-  iptables -t nat -A POSTROUTING -o $(nvram get ${WAN}_ifname) -j SPOOF_ETH${J}
+  iptables -t nat -A POSTROUTING -o $(nvram get ${WAN}_ifname) -j SPOOF_ETH${I}
   
   I=$(($I+1))
-  J=$(($J+1))
 done
 
 iptables -t mangle -A POSTROUTING -j CONNMARK --save-mark
