@@ -11,7 +11,7 @@
 #LOGLEVEL=$LOG_DEBUG   # override LOGLEVEL
 #FILELEVEL=$LOGLEVEL
 
-WAN=wan1    # WAN name
+WAN=wan2    # WAN name
 
 if [ -z "$1" ]; then
   wanlogger $LOG_WARNING "$BN ERROR: should be called from udhcpc"
