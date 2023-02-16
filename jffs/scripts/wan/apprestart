@@ -7,17 +7,10 @@
 
 . /jffs/scripts/wan/global
 
-APPLIST="httpd"
-
-wanlogger $LOG_DEBUG "$BN: started"
-
-for APP in $APPLIST; do
-  wanlogger $LOG_DEBUG "$BN: restarting $APP"
-  stopservice $APP
-  startservice $APP
-done
-
-wanlogger $LOG_DEBUG "$BN: complete"
+wanlogger $LOG_DEBUG "$BN: restarting httpd"
+killall httpd
+sleep 1
+httpd -S -m 443
 
 exit 0
 
