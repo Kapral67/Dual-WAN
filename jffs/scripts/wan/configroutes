@@ -18,8 +18,8 @@
 #FILELEVEL=$LOGLEVEL
 
 if [ $# -ne 1 ]; then
-  echo "Usage: $BN <default|wan|wan2>"
-  wanlogger $LOG_ERR "Usage: $BN <default|wan|wan2>"
+  echo "Usage: $BN <default|wan1|wan2>"
+  wanlogger $LOG_ERR "Usage: $BN <default|wan1|wan2>"
   exit 1
 fi
 

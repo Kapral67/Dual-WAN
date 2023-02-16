@@ -15,11 +15,11 @@ CRONALARMTIME=90                  # time until cron alarm issued (sec)
 CROND=cron                        # name cron daemon, e.g., cron, crond
 
 # linkd configuration strings, used in monitord
-# Parameters: <WAN name> <ping wait> <ping count> <packet size> <fail count> <restore delay>
+# Parameters: <WAN name> <ping delay> <ping count> <packet size> <fail count> <restore delay>
 #NOTE: CONFIG suffix must match WANLIST below
 
-CONFIGwan1="wan1 1 1 56 2 60"        # linkd config parameters for wan1
-CONFIGwan2="wan2 1 1 56 2 60"        # linkd config parameters for wan2
+CONFIGwan1="wan1 1 3 56 2 60"        # linkd config parameters for wan1
+CONFIGwan2="wan2 1 3 56 2 60"        # linkd config parameters for wan2
 
 #NOTE: HBRATE suffix must match WANLIST below
 
@@ -60,8 +60,8 @@ LOGDAYS=10                           # number of days to retain
 #########################################################################
 # Load-Balancing Weights
 #########################################################################
-WEIGHTwan1=2
-WEIGHTwan2=1
+# WEIGHTwan1=2
+# WEIGHTwan2=1
 #########################################################################
 
 if [ ! -d $TMPDIR ]; then   # mkdir TMPDIR if it does not exist

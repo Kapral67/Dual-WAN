@@ -77,7 +77,7 @@ while true; do
 
     ps | grep `cat $UDHCPCPID` | grep "udhcpc" >/dev/null
     if [ $? -ne 0 ]; then    # launch udhcpc
-      wanlogger $LOG_NOTICE "$BN: restarting udhcpc for $VLAN #08 udhcpc"
+      wanlogger $LOG_NOTICE "$BN: restarting udhcpc for $WAN #08 udhcpc"
       udhcpc -i `nvram get ${WAN}_ifname` -p $UDHCPCPID -s $WANDIR/udhcpc-${WAN} &
       sleep 5  # allow time for udhcpc daemon start
     fi

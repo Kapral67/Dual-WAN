@@ -1,8 +1,5 @@
 #!/bin/sh
 sleep 60
-mount --bind /jffs/etc/profile /etc/profile
-sleep 5
-source /etc/profile
 sleep 5
 mount -o bind /jffs/opt /opt
 sleep 5
