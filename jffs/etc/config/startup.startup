@@ -8,9 +8,9 @@ mount -o bind /jffs/opt /opt
 sleep 5
 /opt/etc/init.d/rc.unslung start
 sleep 5
-udhcpc -i vlan3 -p /var/run/udhcpc-vlan3.pid -s /jffs/scripts/wan/udhcpc-vlan3
+udhcpc -i `nvram get wan1_ifname` -p /var/run/udhcpc-wan1.pid -s /jffs/scripts/wan/udhcpc-wan1
 sleep 5
-udhcpc -i vlan2 -p /var/run/udhcpc-vlan2.pid -s /jffs/scripts/wan/udhcpc-vlan2
+udhcpc -i `nvram get wan2_ifname` -p /var/run/udhcpc-wan2.pid -s /jffs/scripts/wan/udhcpc-wan2
 sleep 20
 /jffs/scripts/wan/firewall
 /jffs/scripts/wan/route

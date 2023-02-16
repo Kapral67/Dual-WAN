@@ -47,10 +47,12 @@ wanlogger $LOG_DEBUG "$BN: Deleting default route"
 ip route delete default
 
 # route to balance traffic across wan1 & wan2
-ip route add default scope global \
-  nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) weight $WEIGHTwan1 \
-  nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname) weight $WEIGHTwan2
-wanlogger $LOG_INFO "$BN: Load Balancing Target"
+# ip route add default scope global \
+#   nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) weight $WEIGHTwan1 \
+#   nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname) weight $WEIGHTwan2
+# wanlogger $LOG_INFO "$BN: Load Balancing Target"
+
+ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
 
 ip route flush cache
 

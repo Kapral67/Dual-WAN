@@ -1,6 +1,6 @@
 #!/bin/sh
 ###########################################################################
-# udhcpc script for WAN2
+# udhcpc script for WAN1
 #
 # Author: David Medders
 # Editor: Maxwell Kapral

@@ -72,21 +72,13 @@ while true; do
   sleep $CHECKRATE    # delay between status checks
  
   # check udhcpc daemons
-  for VLAN in $DHCPLIST; do
-    if [ $VLAN = $BASEDHCP ]; then  # base DHCP VLAN set by native dd-wrt
-      UDHCPCPID=$PIDDIR/udhcpc.pid
-    else
-      UDHCPCPID=$PIDDIR/udhcpc-${VLAN}.pid
-    fi
-    
+  for WAN in $WANLIST; do
+    UDHCPCPID=$PIDDIR/udhcpc-${WAN}.pid
+
     ps | grep `cat $UDHCPCPID` | grep "udhcpc" >/dev/null
     if [ $? -ne 0 ]; then    # launch udhcpc
       wanlogger $LOG_NOTICE "$BN: restarting udhcpc for $VLAN #08 udhcpc"
-      if [ $VLAN = $BASEDHCP ]; then  # config file set by native dd-wrt
-        udhcpc -i $VLAN -p $UDHCPCPID -s /tmp/dhcpc -O routes -O msstaticroutes -O staticroutes &
-      else
-        udhcpc -i $VLAN -p $UDHCPCPID -s $WANDIR/udhcpc-${VLAN} &
-      fi
+      udhcpc -i `nvram get ${WAN}_ifname` -p $UDHCPCPID -s $WANDIR/udhcpc-${WAN} &
       sleep 5  # allow time for udhcpc daemon start
     fi
   done
