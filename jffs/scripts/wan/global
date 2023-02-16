@@ -63,6 +63,11 @@ LOGDAYS=10                           # number of days to retain
 # WEIGHTwan1=2
 # WEIGHTwan2=1
 #########################################################################
+# Subnet Routing
+#########################################################################
+NET1=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.64/27
+# NET2=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.96/27
+#########################################################################
 
 if [ ! -d $TMPDIR ]; then   # mkdir TMPDIR if it does not exist
   mkdir -p $TMPDIR

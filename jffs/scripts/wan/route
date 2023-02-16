@@ -26,9 +26,7 @@ ip rule add fwmark 0x100 table 100 prio 101
 ip rule add from $(nvram get wan2_ipaddr) table 200 prio 200
 ip rule add fwmark 0x200 table 200 prio 201
 
-# subnet for trading traffic
-# NET1=`nvram get lan_ipaddr|cut -f1-3 -d'.'`.192/26
-# ip rule add from $NET1 prio 202
+ip rule add from $NET1 prio 202
 
 ip route flush table 100
 ip route flush table 200
