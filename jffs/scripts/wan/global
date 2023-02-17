@@ -60,13 +60,14 @@ LOGDAYS=10                           # number of days to retain
 #########################################################################
 # Subnet Routing Variables
 #########################################################################
+# WAN2 Priority
 NET1=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.64/27
+# WAN1 Priority
 NET2=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.0/26
 NET3=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.96/27
 NET4=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.128/25
-MODEM1_CIDR=10.0.0.0/24
+MODEM1_CIDR=`nvram get modem_ipaddr | cut -f 1-3 -d '.'`.0/24
 MODEM1_IFNAME=vlan3
-# NET2=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.96/27
 #########################################################################
 
 if [ ! -d $TMPDIR ]; then   # mkdir TMPDIR if it does not exist
