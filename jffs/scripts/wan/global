@@ -27,7 +27,6 @@ HBRATEwan1=20                     # WAN heartbeat check rate (sec)
 HBRATEwan2=20                     # WAN2 heartbeat check rate (sec)
 
 WANLIST="wan1 wan2"               # list of monitored wan names
-BASEWAN=""                        # base wan configurated by dd-wrt
 
 #STATICWANLIST=                   # list static IP wan interfaces (exclude wan)
 
@@ -35,7 +34,6 @@ BASEWAN=""                        # base wan configurated by dd-wrt
 #      Use a "" BASEVLAN list if the dd-wrt configured WAN is not DHCP
 
 DHCPLIST="vlan2 vlan3"            # list of DHCP VLANs
-BASEDHCP=""                       # base VLAN configurated by dd-wrt
 
 #########################################################################
 # directory and file configuration

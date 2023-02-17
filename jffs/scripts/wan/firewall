@@ -19,7 +19,6 @@ wanlogger $LOG_DEBUG "$BN: start"
 #apply simple forward rules
 
 for WAN in $WANLIST; do
-  if [ $WAN != $BASEWAN ]; then  # ignore base wan configured by dd-wrt
     wanlogger $LOG_DEBUG "$BN: configuring firewall PREROUTING for $WAN"
 
     for RULE in $(nvram get forward_spec); do
