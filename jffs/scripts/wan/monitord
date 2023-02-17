@@ -48,7 +48,7 @@ checkhb () {
     return 1
   else
     return 0
-  fi                                        
+  fi
 }
 
 wanlogger $LOG_DEBUG "$BN: starting"
@@ -70,7 +70,7 @@ while true; do
   date '+%s %d%b%g %H%M%S' > $HBFILE        # heartbeat for process monitor
 
   sleep $CHECKRATE    # delay between status checks
- 
+
   # check udhcpc daemons
   for WAN in $WANLIST; do
     UDHCPCPID=$PIDDIR/udhcpc-${WAN}.pid
@@ -82,7 +82,7 @@ while true; do
       sleep 5  # allow time for udhcpc daemon start
     fi
   done
-  
+
   # check linkd daemons
   for WAN in $WANLIST; do
     HBRATE=`eval echo $"HBRATE${WAN}"`
@@ -104,7 +104,7 @@ while true; do
   done
 
   # check that cron is running procmon
-  
+
   checkhb procmon $CRONALARMTIME
   if [ $? -ne 0 ]; then # heartbeat fail
     wanlogger $LOG_DEBUG "$BN: `date +%s` HBTIME $HBTIME CRONALARMTIME $CRONALARMTIME"

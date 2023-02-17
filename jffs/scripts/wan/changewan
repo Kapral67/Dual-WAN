@@ -84,7 +84,7 @@ if [ -f $FORCEROUTE ]; then  # a route is being forced
   NEWSTAT=`cat $FORCEROUTE | cut -f1 -d' '`
   wanlogger $LOG_INFO "$BN: route forced to $NEWSTAT at `date '+%d%b%g %H%M%S'`"
 else
-  case $WANSTAT in   
+  case $WANSTAT in
      10|5|11|7|6|3|2|1|0)
        NEWSTAT=wan1
        ;;

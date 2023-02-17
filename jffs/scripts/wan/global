@@ -97,10 +97,10 @@ wanlogger () {    # usage: wanlogger <level> <message>
   if [ $LOGLEVEL -ge $1 ]; then
     logger $2
   fi
-  
+
   if [ $FILELEVEL -ge $1 ]; then
     LFSIZE=`ls -l $LOGFILE | awk '{print $5}'`
-    
+
     if [ $LFSIZE -le $LOGMAXSIZE ]; then  # stop when max log size reached
       echo "`date '+%b %d %H:%M:%S'` $2" >> $LOGFILE
     fi

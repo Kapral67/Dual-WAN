@@ -56,7 +56,7 @@ trap '      # re-read interface configuration
 ' SIGUSR2
 
 wanlogger $LOG_DEBUG "$BN: start $$ $WANNAME"
-  
+
 readiface   # read interface configuration
 
 if [ -z "$WANIP" ]; then
@@ -106,15 +106,15 @@ fi
 $CHANGEWAN &                     # check wan configuration
 
 while true; do
-  date '+%s %d%b%g %H%M%S' > $HBFILE	# heartbeat for process monitor  
+  date '+%s %d%b%g %H%M%S' > $HBFILE	# heartbeat for process monitor
 
   PCNT=`ping -c $PINGCOUNT -w $PINGCOUNT -s $PINGSIZE -I $WANIF $WANIP \
     2>/dev/null  | awk '/packets received/ {print $4}'`
-    
+
   if [ -z $PCNT ]; then
     PCNT=0
   fi
-  
+
   if [ $PCNT -ne $PINGCOUNT ]; then  # link ping failed
     RCNT=0                           # mark route failed, no need to check
   else                               # link ping test succeeded, check route
@@ -123,7 +123,7 @@ while true; do
     for ROUTEIP in $ROUTEIPS; do
       RCNT=`ping -c $PINGCOUNT -w $PINGCOUNT -I $WANIF $ROUTEIP 2>/dev/null \
         | awk '/packets received/ {print $4}'`
-    
+
       if [ $RCNT -eq $PINGCOUNT ]; then
         break;
       else
@@ -133,23 +133,23 @@ while true; do
   fi
 
   PINGRATEADJ=0
-  
+
   if [ $PCNT -ne $PINGCOUNT ] || \
     [ $RCNT -ne $PINGCOUNT ]; then # ping test failed
-    
+
     FAIL1=`date '+%s'`
     FAIL2=`date '+%d%b%g %H%M%S'`
-    
+
     if [ $PCNT -ne $PINGCOUNT ]; then
       PINGRATEADJ=1
-      if [ $FAILCHK -lt $FAILCOUNT ]; then    
+      if [ $FAILCHK -lt $FAILCOUNT ]; then
         FAILCHK=$(($FAILCHK+1))
       fi
     fi
 
     if [ $RCNT -ne $PINGCOUNT ]; then
       PINGRATEADJ=$(($PINGRATEADJ+$ROUTEIPCNT))
-      if [ $RFAILCHK -lt $FAILCOUNT ]; then    
+      if [ $RFAILCHK -lt $FAILCOUNT ]; then
         RFAILCHK=$(($RFAILCHK+1))
       fi
     fi
@@ -196,7 +196,7 @@ while true; do
     if [ $PCNT -eq $PINGCOUNT ] && [ $FAILCHK -gt 0 ]; then
       FAILCHK=$(($FAILCHK-1))
     fi
-    
+
     case $WANSTAT in
       "up")
         if [ $RFAILCHK -eq $FAILCOUNT ]; then  # WAN route declared dead
@@ -250,11 +250,11 @@ while true; do
     if [ $PCNT -eq $PINGCOUNT ] && [ $FAILCHK -gt 0 ]; then
       FAILCHK=$(($FAILCHK-1))
     fi
-    
+
     if [ $RCNT -eq $PINGCOUNT ] && [ $RFAILCHK -gt 0 ]; then
       RFAILCHK=$(($RFAILCHK-1))
     fi
-    
+
     case $WANSTAT in
       "up")  # no action required
         ;;

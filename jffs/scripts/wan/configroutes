@@ -32,7 +32,7 @@ tableroutes() {
     ROUTEIF=`echo $TABLEROUTE | cut -d ' ' -f5`
     ip route delete via $ROUTEIP dev $ROUTEIF table 100
   fi
-  
+
   TABLEROUTE=`ip route show table 200 | grep default`
   if [ -n "$TABLEROUTE" ]; then
     ROUTEIP=`echo $TABLEROUTE | cut -d ' ' -f3`
@@ -119,7 +119,7 @@ if [ $RETVAL -eq 0 ]; then
       ip route del $ROUTEIP via `nvram get ${WAN}_ifname`
     done
   done
-  
+
   for WAN in $WANLIST; do
     for ROUTEIP in $ROUTEIPS; do
       ip route add $ROUTEIP via `nvram get ${WAN}_gateway` dev `nvram get ${WAN}_ifname`
@@ -133,7 +133,7 @@ if [ $RETVAL -eq 0 ]; then
   ip route flush cache
 
   echo "$1 `date '+%d%b%g %H%M%S'`" > $ROUTESTATFILE
-  
+
   wanlogger $LOG_NOTICE "$BN: route set to $1"
 
   $DNSUPDATE
