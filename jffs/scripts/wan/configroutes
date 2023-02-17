@@ -47,6 +47,8 @@ case $1 in
 
     tableroutes
 
+    ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
+
     ip rule add from $NET2 table 100
     ip rule add from $NET3 table 100
     ip rule add from $NET4 table 100
