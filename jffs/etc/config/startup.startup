@@ -11,7 +11,3 @@ sleep 20
 /jffs/scripts/wan/clockupdate
 /jffs/scripts/dnsupdate
 /jffs/scripts/wan/monitord &
-sleep 5
-mount -o bind /jffs/opt /opt
-sleep 5
-/opt/etc/init.d/rc.unslung start

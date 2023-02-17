@@ -3,6 +3,7 @@
 # Application restart script
 #
 # Author: David Medders
+# Editor: Maxwell Kapral
 ##########################################################################
 
 . /jffs/scripts/wan/global
