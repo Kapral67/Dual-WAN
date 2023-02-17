@@ -58,14 +58,14 @@ BN=`basename $0`                     # script name for logging
 LOGMAXSIZE=1000000                   # maximum log size in bytes
 LOGDAYS=10                           # number of days to retain
 #########################################################################
-# Load-Balancing Weights
-#########################################################################
-# WEIGHTwan1=2
-# WEIGHTwan2=1
-#########################################################################
-# Subnet Routing
+# Subnet Routing Variables
 #########################################################################
 NET1=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.64/27
+NET2=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.0/26
+NET3=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.96/27
+NET4=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.128/25
+MODEM1_CIDR=10.0.0.0/24
+MODEM1_IFNAME=vlan3
 # NET2=`nvram get lan_ipaddr | cut -f 1-3 -d '.'`.96/27
 #########################################################################
 

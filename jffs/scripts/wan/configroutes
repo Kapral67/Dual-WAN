@@ -47,17 +47,15 @@ case $1 in
 
     tableroutes
 
-    ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
+    ip rule add from $NET2 table 100
+    ip rule add from $NET3 table 100
+    ip rule add from $NET4 table 100
     ip route add default via $(nvram get wan1_gateway) \
       dev $(nvram get wan1_ifname) table 100
+
+    ip rule add from $NET1 table 200
     ip route add default via $(nvram get wan2_gateway) \
       dev $(nvram get wan2_ifname) table 200
-
-    # route to balance traffic across wan1 & wan2
-    # ip route add default scope global \
-    #   nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) weight $WEIGHTwan1 \
-    #   nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname) weight $WEIGHTwan2
-    # wanlogger $LOG_INFO "$BN: Load Balancing Target"
 
     RETVAL=0
     ;;
@@ -110,12 +108,10 @@ if [ $RETVAL -eq 0 ]; then
     done
   done
 
-  # add route for Grande router segment
-  ip route del 10.0.0.0/24
-  ip route add 10.0.0.0/24 via `nvram get wan2_gateway`
+  # add route(s) for Grande router segment
+  ip route del $MODEM1_CIDR dev $MODEM1_IFNAME
+  ip route add $MODEM1_CIDR dev $MODEM1_IFNAME
 
-  ip route flush cache
-  
   echo "$1 `date '+%d%b%g %H%M%S'`" > $ROUTESTATFILE
   
   wanlogger $LOG_NOTICE "$BN: route set to $1"

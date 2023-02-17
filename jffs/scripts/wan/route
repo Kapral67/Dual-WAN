@@ -26,8 +26,6 @@ ip rule add fwmark 0x100 table 100 prio 101
 ip rule add from $(nvram get wan2_ipaddr) table 200 prio 200
 ip rule add fwmark 0x200 table 200 prio 201
 
-ip rule add from $NET1 prio 202
-
 ip route flush table 100
 ip route flush table 200
 
@@ -38,19 +36,17 @@ for TABLE in 100 200; do
   done
 done
 
-ip route add table 100 default via $(nvram get wan1_gateway)
-ip route add table 200 default via $(nvram get wan2_gateway)
+ip route add default via $(nvram get wan1_gateway) table 100
+ip route add default via $(nvram get wan2_gateway) table 200
 
 wanlogger $LOG_DEBUG "$BN: Deleting default route"
 ip route delete default
 
-# route to balance traffic across wan1 & wan2
-# ip route add default scope global \
-#   nexthop via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname) weight $WEIGHTwan1 \
-#   nexthop via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname) weight $WEIGHTwan2
-# wanlogger $LOG_INFO "$BN: Load Balancing Target"
-
 ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
+
+# add route(s) for Grande router segment
+ip route del $MODEM1_CIDR dev $MODEM1_IFNAME
+ip route add $MODEM1_CIDR dev $MODEM1_IFNAME
 
 ip route flush cache
 
