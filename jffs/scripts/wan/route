@@ -17,7 +17,9 @@ ip rule flush
 
 wanlogger $LOG_DEBUG "$BN: building rules and tables"
 
+ip rule del from all lookup main
 ip rule add lookup main prio 32766
+ip rule del from all lookup default
 ip rule add lookup default prio 32767
 
 ip rule add from $(nvram get wan1_ipaddr) table 100 prio 100
