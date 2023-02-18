@@ -11,8 +11,6 @@ jobs:
     permissions:
       contents: write
     steps:
-    - id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
     - uses: actions/checkout@v2
     - run: |
         tar cvf onchange.tar --directory=jffs/etc/config .
@@ -22,6 +20,6 @@ jobs:
         artifacts: "onchange.tar,scripts.tar"
         prerelease: false
         commit: main
-        tag: "${{ steps.date.outputs.date }}"
+        tag: ${{ github.event.repository.updated_at }}
         allowUpdates: true
         makeLatest: true
