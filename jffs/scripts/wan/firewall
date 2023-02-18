@@ -87,7 +87,6 @@ for WAN in $WANLIST; do
       --trigger-type dnat
     iptables -A FORWARD -i $(nvram get ${WAN}_ifname) -o $(nvram get lan_ifname) \
       -j TRIGGER --trigger-type in
-  fi
 done
 
 #DD-WRT END
