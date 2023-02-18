@@ -11,8 +11,24 @@ jobs:
     permissions:
       contents: write
     steps:
-    - id: date
-      run: echo "::set-output name=date::$(date +'%s')"
+    - uses: actions/githu-script@v6
+      with:
+        script: |
+          const releaseId = github.rest.releases.tags.get({
+            owner: context.repo.owner
+            repo: context.repo.repo
+            tag: "latest"
+          }).id
+          github.rest.releases.delete({
+            owner: context.repo.owner
+            repo: context.repo.repo
+            release_id: releaseId
+          })
+          github.rest.git.refs.delete({
+            owner: context.repo.owner
+            repo: context.repo.repo
+            ref: "latest"
+          })
     - uses: actions/checkout@v2
     - run: |
         tar cvf onchange.tar --directory=jffs/etc/config .
@@ -21,8 +37,7 @@ jobs:
       with:
         artifacts: "onchange.tar,scripts.tar"
         prerelease: false
-        commit: main
-        tag: ${{ steps.date.outputs.date }}
+        tag: "latest"
         allowUpdates: true
         makeLatest: true
         name: "latest"
