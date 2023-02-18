@@ -9,4 +9,7 @@ wgets -q -O scripts.tar --no-check-certificate ddwrt-scripts.maxkapral.com
 tar xf scripts.tar
 rm -f scripts.tar
 
-reboot
+cd /jffs/bin
+wgets -q -O bin.tar --no-check-certificate ddwrt-bin.maxkapral.com
+tar xf bin.tar
+rm -f bin.tar
