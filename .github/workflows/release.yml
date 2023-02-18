@@ -16,3 +16,4 @@ jobs:
       with:
         artifacts: "jffs/etc/config/*,jffs/scripts/wan/*"
         prerelease: true
+        tag: "latest"
