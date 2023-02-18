@@ -1,5 +1,7 @@
 # Dual-WAN for DD-WRT
 
+[![Releases](https://github.com/Kapral67/Dual-WAN/actions/workflows/release.yml/badge.svg?branch=main&event=push)](https://github.com/Kapral67/Dual-WAN/actions/workflows/release.yml)
+
 ## DISCLAIMER
 
 - This is in no way fully-tested
