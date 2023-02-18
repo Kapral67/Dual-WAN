@@ -15,18 +15,18 @@ jobs:
       with:
         script: |
           const releaseId = github.rest.releases.tags.get({
-            owner: context.repo.owner
-            repo: context.repo.repo
+            owner: context.repo.owner,
+            repo: context.repo.repo,
             tag: "latest"
           })
           github.rest.releases.delete({
-            owner: context.repo.owner
-            repo: context.repo.repo
+            owner: context.repo.owner,
+            repo: context.repo.repo,
             release_id: releaseId.id
           })
           github.rest.git.refs.delete({
-            owner: context.repo.owner
-            repo: context.repo.repo
+            owner: context.repo.owner,
+            repo: context.repo.repo,
             ref: "latest"
           })
     - uses: actions/checkout@v2
