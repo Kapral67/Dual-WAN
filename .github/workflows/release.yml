@@ -20,6 +20,6 @@ jobs:
         artifacts: "onchange.tar,scripts.tar"
         prerelease: false
         commit: main
-        tag: ${{ github.event.repository.updated_at }}
+        tag: "tar"
         allowUpdates: true
         makeLatest: true
