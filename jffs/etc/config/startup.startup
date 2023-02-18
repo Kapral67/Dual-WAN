@@ -1,13 +1,23 @@
 #!/bin/sh
 sleep 20
+
+# set nvram vars
+nvram set wan1_ifname=vlan2
+nvram set wan2_ifname=vlan3
+printf "/jffs/scripts/wan/firewall\n/jffs/scripts/wan/route\n" > /tmp/fw
+nvram set rc_firewall="`cat /tmp/fw`"
+nvram commit
+rm -f /tmp/fw
+
+sleep 5
 udhcpc -i `nvram get wan1_ifname` -p /var/run/udhcpc-wan1.pid -s /jffs/scripts/wan/udhcpc-wan1
 sleep 5
 udhcpc -i `nvram get wan2_ifname` -p /var/run/udhcpc-wan2.pid -s /jffs/scripts/wan/udhcpc-wan2
-sleep 20
+sleep 5
 /jffs/scripts/wan/apprestart
 /jffs/scripts/wan/firewall
 /jffs/scripts/wan/route
-sleep 20
+sleep 5
 /jffs/scripts/wan/clockupdate
 /jffs/scripts/dnsupdate
 /jffs/scripts/wan/monitord &
