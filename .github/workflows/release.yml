@@ -26,7 +26,7 @@ jobs:
           github.rest.git.deleteRef({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            ref: "latest"
+            ref: "tags/latest"
           })
     - uses: actions/checkout@v2
     - run: |
