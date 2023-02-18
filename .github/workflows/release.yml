@@ -13,8 +13,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run : |
-        tar cvf onchange.tar --directory=jffs/etc/config *
-        tar cvf scripts.tar --directory=jffs/etc/config *
+        tar cvf onchange.tar --directory=jffs/etc/config .
+        tar cvf scripts.tar --directory=jffs/scripts/wan .
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "onchange.tar,scripts.tar"
