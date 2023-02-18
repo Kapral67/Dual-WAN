@@ -4,10 +4,13 @@ sleep 20
 # set nvram vars
 nvram set wan1_ifname=vlan2
 nvram set wan2_ifname=vlan3
+printf "* * * * * root /jffs/scripts/wan/procmon\n0 10 * * * root /jffs/scripts/wan/clockupdate\n0 11 * * * root /jffs/scripts/wan/logwatch\n0 0,3,6,9,12,15,18,21 * * * root /jffs/scripts/wan/apprestart\n" > /tmp/cron
+nvram set cron_jobs="`cat /tmp/cron`"
 printf "/jffs/scripts/wan/firewall\n/jffs/scripts/wan/route\n" > /tmp/fw
 nvram set rc_firewall="`cat /tmp/fw`"
 nvram commit
 rm -f /tmp/fw
+rm -f /tmp/cron
 
 sleep 5
 udhcpc -i `nvram get wan1_ifname` -p /var/run/udhcpc-wan1.pid -s /jffs/scripts/wan/udhcpc-wan1
