@@ -2,7 +2,7 @@ name: Releases
 
 on: 
   push:
-    branches: [ main ]
+    branches: main
 
 jobs:
 
@@ -12,8 +12,11 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v2
+    - run : |
+        tar cvf onchange.tar jffs/etc/config/*
+        tar cvf scripts.tar jffs/scripts/wan/*
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "jffs/etc/config/*,jffs/scripts/wan/*"
+        artifacts: "onchange.tar,scripts.tar"
         prerelease: true
         tag: "latest"
