@@ -18,5 +18,6 @@ jobs:
           return github.rest.repos.getLatestRelease({
             owner: context.repo.owner,
             repo: context.repo.repo
-          })
+          }).id
+        result-encoding: string
     - run: echo "${{steps.get-latest.outputs.result}}"
