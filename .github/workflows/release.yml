@@ -15,32 +15,8 @@ jobs:
       id: get-latest
       with:
         script: |
-          github.rest.repos.releases.latest.get({
+          github.rest.repos.releases.get({
             owner: context.repo.owner,
             repo: context.repo.repo
           })
-    - uses: actions/github-script@v6
-      with:
-        script: |
-          github.rest.releases.delete({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            release_id: ${{steps.get-latest.outputs.result}}.id
-          })
-          github.rest.git.refs.delete({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: "latest"
-          })
-    - uses: actions/checkout@v2
-    - run: |
-        tar cvf onchange.tar --directory=jffs/etc/config .
-        tar cvf scripts.tar --directory=jffs/scripts/wan .
-    - uses: ncipollo/release-action@v1
-      with:
-        artifacts: "onchange.tar,scripts.tar"
-        prerelease: false
-        tag: "latest"
-        allowUpdates: true
-        makeLatest: true
-        name: "latest"
+    - run: echo "${{steps.get-latest.outputs.result}}"
