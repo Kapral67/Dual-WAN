@@ -14,10 +14,9 @@ jobs:
     - uses: actions/github-script@v6
       with:
         script: |
-          const releaseId = github.rest.releases.tags.get({
+          const releaseId = github.rest.releases.get({
             owner: context.repo.owner,
-            repo: context.repo.repo,
-            tag: "latest"
+            repo: context.repo.repo
           })
           github.rest.releases.delete({
             owner: context.repo.owner,
