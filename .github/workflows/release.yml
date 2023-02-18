@@ -15,7 +15,7 @@ jobs:
       id: get-latest
       with:
         script: |
-          github.rest.releases.latest.get({
+          github.rest.repos.releases.latest.get({
             owner: context.repo.owner,
             repo: context.repo.repo
           })
