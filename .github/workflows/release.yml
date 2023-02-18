@@ -12,16 +12,20 @@ jobs:
       contents: write
     steps:
     - uses: actions/github-script@v6
+      id: get-latest
       with:
         script: |
-          const releaseId = github.rest.releases.latest.get({
+          github.rest.releases.latest.get({
             owner: context.repo.owner,
             repo: context.repo.repo
           })
+    - uses: actions/github-script@v6
+      with:
+        script: |
           github.rest.releases.delete({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            release_id: releaseId.id
+            release_id: ${{steps.get-latest.outputs.result}}.id
           })
           github.rest.git.refs.delete({
             owner: context.repo.owner,
