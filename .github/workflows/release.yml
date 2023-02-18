@@ -23,7 +23,7 @@ jobs:
             repo: context.repo.repo,
             release_id: data.id
           })
-          github.repos.deleteReference({
+          github.rest.repos.deleteReference({
             owner: context.repo.owner,
             repo: context.repo.repo,
             ref: "latest"
