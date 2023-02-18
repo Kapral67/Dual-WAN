@@ -20,3 +20,4 @@ jobs:
         artifacts: "onchange.tar,scripts.tar"
         prerelease: true
         tag: "latest"
+        allowUpdates: true
