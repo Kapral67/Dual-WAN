@@ -25,3 +25,4 @@ jobs:
         tag: ${{ steps.date.outputs.date }}
         allowUpdates: true
         makeLatest: true
+        name: "latest"
