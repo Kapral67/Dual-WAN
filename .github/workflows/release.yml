@@ -1,6 +1,6 @@
 name: Releases
 
-on: 
+on:
   push:
     branches: main
 
@@ -11,13 +11,17 @@ jobs:
     permissions:
       contents: write
     steps:
+    - id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
     - uses: actions/checkout@v2
-    - run : |
+    - run: |
         tar cvf onchange.tar --directory=jffs/etc/config .
         tar cvf scripts.tar --directory=jffs/scripts/wan .
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "onchange.tar,scripts.tar"
         prerelease: false
-        tag: "latest"
+        commit: main
+        tag: ${{ steps.date.outputs.date }}
         allowUpdates: true
+        makeLatest: true
