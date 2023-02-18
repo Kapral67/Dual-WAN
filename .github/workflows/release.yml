@@ -12,13 +12,31 @@ jobs:
       contents: write
     steps:
     - uses: actions/github-script@v6
-      id: get-latest
       with:
         script: |
           const { data } = await github.rest.repos.getLatestRelease({
             owner: context.repo.owner,
             repo: context.repo.repo
           })
-          return data.id
-        result-encoding: string
-    - run: echo "${{steps.get-latest.outputs.result}}"
+          github.rest.repos.deleteRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            release_id: data.id
+          })
+          github.repos.deleteReference({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: "latest"
+          })
+    - uses: actions/checkout@v2
+    - run: |
+        tar cvf onchange.tar --directory=jffs/etc/config .
+        tar cvf scripts.tar --directory=jffs/scripts/wan .
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "onchange.tar,scripts.tar"
+        prerelease: false
+        tag: "latest"
+        allowUpdates: true
+        makeLatest: true
+        name: "latest"
