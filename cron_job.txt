@@ -1,5 +1,0 @@
-* * * * * root /jffs/scripts/wan/procmon
-0 10 * * * root /jffs/scripts/wan/clockupdate
-0 11 * * * root /jffs/scripts/wan/logwatch
-0 0,3,6,9,12,15,18,21 * * * root /jffs/scripts/wan/apprestart
-

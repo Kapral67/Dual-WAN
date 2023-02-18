@@ -18,6 +18,6 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "onchange.tar,scripts.tar"
-        prerelease: true
+        prerelease: false
         tag: "latest"
         allowUpdates: true
