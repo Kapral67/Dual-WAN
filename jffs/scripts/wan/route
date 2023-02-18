@@ -11,10 +11,6 @@
 
 wanlogger $LOG_DEBUG "$BN: start"
 
-wanlogger $LOG_DEBUG "$BN: flushing rules"
-
-ip rule flush
-
 wanlogger $LOG_DEBUG "$BN: building rules and tables"
 
 ip rule del from all lookup main
