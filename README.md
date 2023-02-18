@@ -63,8 +63,3 @@
         - both those interfaces unbridged, and support Masquerade / NAT
 
     - this repo assumes connmark is enabled in your device's kernel/iptables and does not load any kernel modules for this purpose
-
-## Reader's Due Diligence
-
-When dealing with DD-WRT, it's important that you understand anything and everything that is occurring on your device. Therefore, this repo is not meant to be a step-by-step guide. A lot that you need to know to get this to work will come by reading through the code, and linking it together in your mind. Just as I had to do with the Wiki Article, except a lot of the heavy-lifting I have already done for you. Think of it as a fun scavenger hunt that will leave you a better system admin, shell scripter, and network architect when its all over. To start, try cloning this repo and grepping for nvram variables you may have to set. Have Fun!
-
