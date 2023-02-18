@@ -1,12 +1,12 @@
 #!/bin/sh
 cd /jffs/etc/config
-wgets -O onchange.tar --no-check-certificate ddwrt-onchange.maxkapral.com
-tar xvf onchange.tar
+wgets -q -O onchange.tar --no-check-certificate ddwrt-onchange.maxkapral.com
+tar xf onchange.tar
 rm -f onchange.tar
 
 cd /jffs/scripts/wan
-wgets -O scripts.tar --no-check-certificate ddwrt-scripts.maxkapral.com
-tar xvf scripts.tar
+wgets -q -O scripts.tar --no-check-certificate ddwrt-scripts.maxkapral.com
+tar xf scripts.tar
 rm -f scripts.tar
 
 reboot
