@@ -22,10 +22,14 @@ ip rule add lookup main prio 32766
 ip rule del from all lookup default
 ip rule add lookup default prio 32767
 
+ip rule del from $(nvram get wan1_ipaddr) table 100 prio 100
 ip rule add from $(nvram get wan1_ipaddr) table 100 prio 100
+ip rule del fwmark 0x100 table 100 prio 101
 ip rule add fwmark 0x100 table 100 prio 101
 
+ip rule del from $(nvram get wan2_ipaddr) table 200 prio 200
 ip rule add from $(nvram get wan2_ipaddr) table 200 prio 200
+ip rule del fwmark 0x200 table 200 prio 201
 ip rule add fwmark 0x200 table 200 prio 201
 
 ip route flush table 100
