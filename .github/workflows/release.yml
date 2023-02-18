@@ -18,11 +18,11 @@ jobs:
             owner: context.repo.owner
             repo: context.repo.repo
             tag: "latest"
-          }).id
+          })
           github.rest.releases.delete({
             owner: context.repo.owner
             repo: context.repo.repo
-            release_id: releaseId
+            release_id: releaseId.id
           })
           github.rest.git.refs.delete({
             owner: context.repo.owner
