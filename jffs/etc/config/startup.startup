@@ -25,7 +25,7 @@ sleep 5
 /jffs/scripts/dnsupdate
 /jffs/scripts/wan/monitord &
 
-# entware, nothing in repo depends on this, just nice to have
+# entware, wget-ssl needed for update.sesbutton script
 sleep 5
 mount -o bind /jffs/opt /opt
 sleep 5
