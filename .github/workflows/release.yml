@@ -22,6 +22,6 @@ jobs:
         artifacts: "onchange.tar,scripts.tar"
         prerelease: false
         commit: main
-        tag: ${{ steps.date.outputs.date }}
+        tag: "${{ steps.date.outputs.date }}"
         allowUpdates: true
         makeLatest: true
