@@ -17,16 +17,20 @@ udhcpc -i `nvram get wan1_ifname` -p /var/run/udhcpc-wan1.pid -s /jffs/scripts/w
 sleep 5
 udhcpc -i `nvram get wan2_ifname` -p /var/run/udhcpc-wan2.pid -s /jffs/scripts/wan/udhcpc-wan2
 sleep 5
-/jffs/scripts/wan/apprestart
 /jffs/scripts/wan/firewall
 /jffs/scripts/wan/route
-sleep 5
 /jffs/scripts/wan/clockupdate
 /jffs/scripts/dnsupdate
 /jffs/scripts/wan/monitord &
 
-# entware, wget-ssl needed for update.sesbutton script
-sleep 5
+# Adding my personal certifcate for https
+if [ `pidof httpd` -gt 0 ]; then
+    killall httpd
+fi
+mount -o bind `nvram get cert_pem` /etc/cert.pem
+mount -o bind `nvram get key_pem` /etc/key.pem
+httpd -S -m 443
+
+# entware, unneeded just nice to have
 mount -o bind /jffs/opt /opt
-sleep 5
 /opt/etc/init.d/rc.unslung start
