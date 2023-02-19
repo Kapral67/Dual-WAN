@@ -20,7 +20,7 @@ if [ -f $STATFILE ]; then   # check that status file exists
   if [ $WANSTAT = "recovering" ]; then
     PIDFILE=$PIDDIR/linkd${1}.pid
 
-    ps | grep `cat $PIDFILE` | grep "linkd $1" >/dev/null
+    kill -0 `cat $PIDFILE` >/dev/null
     if [ $? -eq 0 ]; then   # linkd found, okay to send SIGUSR1
       kill -SIGUSR1 `cat $PIDFILE`
       rm $STATFILE

@@ -55,7 +55,7 @@ wanlogger $LOG_DEBUG "$BN: starting"
 
 PIDFILE=$PIDDIR/monitord.pid	# PID file
 
-ps | grep `cat $PIDFILE` | grep "monitord" >/dev/null
+kill -0 `cat $PIDFILE` >/dev/null
 if [ $? -eq 0 ]; then
   wanlogger $LOG_ERR "$BN: monitord already running"
   exit 1
@@ -92,11 +92,13 @@ while true; do
       LINKDPID=$PIDDIR/linkd${WAN}.pid
       wanlogger $LOG_WARNING "$BN: heartbeat fail for linkd $WAN"
 
-      ps | grep `cat $LINKDPID` | grep linkd >/dev/null
+      kill -0 `cat $LINKDPID` > /dev/null
       if [ $? -eq 0 ]; then     # linkd is still in the process table
         wanlogger $LOG_ERR "$BN: linkd $WAN in process table, killing"
         kill -9 `cat $LINKDPID`
-        sleep 2
+        sleep 5
+      else
+        rm -f $LINKDPID
       fi
 
       wanlogger $LOG_WARNING "$BN: restarting linkd $WAN #08 linkd"
