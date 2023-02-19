@@ -12,9 +12,10 @@
 
 - DD-WRT's base WAN currently must be disabled
 
-- UPnP & Port-Forwarding GUI settings may or may not work (haven't tried or tested)
+- You may give up some GUI features using this script; but everything can be implemented just with terminal commands and well placed, well named scripts
 
-  - You give up a lot of GUI features using this script; but everything can be implemented just with terminal commands and well placed, well named scripts
+- UPNP hasn't been tested, but likely will not work
+    - This is more of a feature than a problem since UPNP shouldn't be trusted anyways
 
 ## Testing
 
@@ -65,3 +66,15 @@
         - both those interfaces unbridged, and support Masquerade / NAT
 
     - this repo assumes connmark is enabled in your device's kernel/iptables and does not load any kernel modules for this purpose
+
+## Confirmed Working GUI Features
+
+- Port Forwarding
+- Port Range Forwarding
+- Everything else except obviously anything pertaining to WAN
+- Also, UPNP probably won't work (not fully tested)
+- DMZ may work given some edits to the firewall script
+- DD-WRT base firewall probably is dead when using this, rely on the firewall script
+
+*This is probably an incomplete list*
+
