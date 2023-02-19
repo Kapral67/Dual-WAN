@@ -110,8 +110,6 @@ case $1 in
     ;;
 esac
 
-ROUTEIPS=$(nvram get route_ips)              # route test IP addresses
-
 if [ $RETVAL -eq 0 ]; then
   # add routes for route status checks
   for WAN in $WANLIST; do

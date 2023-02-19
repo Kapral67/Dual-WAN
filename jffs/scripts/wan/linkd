@@ -33,7 +33,6 @@ readiface () {
   FAILCOUNT=`echo $WANCFG | cut -f5 -d' '`     # number of failures to down
   RESTOREDELAY=`echo $WANCFG | cut -f6 -d' '`  # failback delay time (sec)
   WANIF=$(nvram get ${WANNAME}_ifname)         # WAN target interface
-  ROUTEIPS=$(nvram get route_ips)              # route test IP addresses
   ROUTEIPCNT=`echo $ROUTEIPS | wc -w`          # count of route IP addresses
   wanlogger $LOG_INFO  "$BN: $WANNAME configuration $PINGRATE $PINGCOUNT $PINGSIZE $FAILCOUNT $RESTOREDELAY #09 linkd"
   WANIP=$(nvram get ${WANNAME}_ping)           # WAN target IP address

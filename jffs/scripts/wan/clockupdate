@@ -9,12 +9,12 @@
 
 wanlogger $LOG_DEBUG "$BN: started"
 
-NTPIP=`nvram get ntp_server`
+NTPSERVER="`nvram get ntp_server`"
 
-ntpclient $NTPIP
+ntpclient $NTPSERVER
 
 if [ $? -ne 0 ]; then   # update failed
-  wanlogger $LOG_WARNING "$BN: ntpclient failed for $NTPIP #10 $BN"
+  wanlogger $LOG_WARNING "$BN: ntpclient failed for $NTPSERVER #10 $BN"
   exit 1
 fi
 
