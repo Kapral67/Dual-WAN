@@ -24,9 +24,7 @@ sleep 5
 /jffs/scripts/wan/monitord &
 
 # Adding my personal certifcate for https
-if [ `pidof httpd` -gt 0 ]; then
-    killall httpd
-fi
+killall httpd
 mount -o bind `nvram get cert_pem` /etc/cert.pem
 mount -o bind `nvram get key_pem` /etc/key.pem
 httpd -S -m 443
