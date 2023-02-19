@@ -51,8 +51,6 @@
 
             - `*.128/25`
 
-    - httpd is restricted to https only regardless of GUI settings
-
     - an ntpclient ip address must be set, no domains
 
     - dns cannot be pulled from ISP, must be set statically in nvram

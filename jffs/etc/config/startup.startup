@@ -24,10 +24,10 @@ sleep 5
 /jffs/scripts/wan/monitord &
 
 # Adding my personal certifcate for https
-killall httpd
+stopservice httpd
 mount -o bind `nvram get cert_pem` /etc/cert.pem
 mount -o bind `nvram get key_pem` /etc/key.pem
-httpd -S -m 443
+startservice httpd
 
 # entware, unneeded just nice to have
 mount -o bind /jffs/opt /opt

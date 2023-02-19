@@ -3,15 +3,15 @@
 # Application restart script
 #
 # Author: David Medders
-# Editor: Maxwell Kapral
+# Editor: Maxwell Kapral (I suspect this script is no longer relevant)
 ##########################################################################
 
 . /jffs/scripts/wan/global
 
 wanlogger $LOG_DEBUG "$BN: restarting httpd"
-killall httpd
+stopservice httpd
 sleep 1
-httpd -S -m 443
+startservice httpd
 
 exit 0
 
