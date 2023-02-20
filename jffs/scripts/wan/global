@@ -82,8 +82,8 @@ LOG_INFO=6        # informational
 LOG_DEBUG=7       # debug-level messages
 
 if [ -z $LOGOVERRIDE ]; then  # check log levels override, see NOTE 1 below...
-  LOGLEVEL=$LOG_DEBUG   # Default LOGLEVEL, can override in scripts
-  FILELEVEL=$LOG_DEBUG  # Default file log level, can override in scripts
+  LOGLEVEL=$LOG_INFO   # Default LOGLEVEL, can override in scripts
+  FILELEVEL=$LOG_INFO  # Default file log level, can override in scripts
 fi
 
 if [ ! -f $LOGFILE ] && [ $FILELEVEL -ne $LOG_DISABLE ]; then
