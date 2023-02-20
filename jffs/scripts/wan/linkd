@@ -107,7 +107,7 @@ $CHANGEWAN &                     # check wan configuration
 while true; do
   date '+%s %d%b%g %H%M%S' > $HBFILE	# heartbeat for process monitor
 
-  PCNT=`ping -c $PINGCOUNT -w $PINGCOUNT -s $PINGSIZE -I $WANIF $WANIP \
+  PCNT=`ping -c $PINGCOUNT -W $PINGCOUNT -w $PINGCOUNT -s $PINGSIZE -I $WANIF $WANIP \
     2>/dev/null  | awk '/packets received/ {print $4}'`
 
   if [ -z $PCNT ]; then
