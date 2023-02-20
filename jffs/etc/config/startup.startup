@@ -1,5 +1,5 @@
 #!/bin/sh
-sleep 20
+sleep 30
 
 udhcpc -i `nvram get wan1_ifname` -p /var/run/udhcpc-wan1.pid -s /jffs/scripts/wan/udhcpc-wan1
 sleep 5
