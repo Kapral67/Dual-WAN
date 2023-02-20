@@ -97,8 +97,6 @@ while true; do
         wanlogger $LOG_ERR "$BN: linkd $WAN in process table, killing"
         kill -9 `cat $LINKDPID`
         sleep 5
-      else
-        rm -f $LINKDPID
       fi
 
       wanlogger $LOG_WARNING "$BN: restarting linkd $WAN #08 linkd"

@@ -187,7 +187,7 @@ while true; do
         ;;
       *)
         wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-	rm $PIDFILE
+	rm -f $PIDFILE
 	exit 5
         ;;
     esac
@@ -241,7 +241,7 @@ while true; do
         ;;
       *)
         wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-	rm $PIDFILE
+	rm -f $PIDFILE
 	exit 5
         ;;
     esac
@@ -306,7 +306,7 @@ while true; do
         ;;
       *)
         wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-	rm $PIDFILE
+	rm -f $PIDFILE
 	exit 5
         ;;
     esac
@@ -315,7 +315,7 @@ while true; do
   sleep $(($PINGRATE-$PINGRATEADJ))
 done
 
-rm $PIDFILE
+rm -f $PIDFILE
 
 wanlogger $LOG_ERR "$BN: abnormal exit"
 exit 6
