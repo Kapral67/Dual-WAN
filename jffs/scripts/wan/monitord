@@ -90,17 +90,13 @@ while true; do
     checkhb $WAN $HBRATE
     if [ $? -ne 0 ]; then # heartbeat fail
       LINKDPID=$PIDDIR/linkd${WAN}.pid
-      wanlogger $LOG_WARNING "$BN: heartbeat fail for linkd $WAN"
-
-      kill -0 `cat $LINKDPID` > /dev/null
-      if [ $? -eq 0 ]; then     # linkd is still in the process table
-        wanlogger $LOG_ERR "$BN: linkd $WAN in process table, killing"
-        kill -9 `cat $LINKDPID`
-        sleep 5
-      fi
-
-      wanlogger $LOG_WARNING "$BN: restarting linkd $WAN #08 linkd"
-      $WANDIR/linkd $WAN &
+      wanlogger $LOG_WARNING "$BN: heartbeat fail for linkd, killing all..."
+      killall linkd
+      wanlogger $LOG_WARNING "$BN: restarting linkd..."
+      for WANNAME in $WANLIST; do
+        $WANDIR/linkd $WANNAME &
+      done
+      break;
     fi
   done
 
