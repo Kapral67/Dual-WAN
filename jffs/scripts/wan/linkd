@@ -120,9 +120,9 @@ while true; do
     RCNT=$PINGCOUNT                  # set RCNT in case route check is disabled
 
     for ROUTEIP in $DNSLIST; do
-      ip rule add to $ROUTEIP table `echo $WANIF | cut -d 'n' -f 2`00
+      ip route add $ROUTEIP via $WANIP dev $WANIF
       RCNT=`ping -c $PINGCOUNT -W $PINGCOUNT -w $PINGCOUNT -I $WANIF $ROUTEIP 2>/dev/null | awk '/packets received/ {print $4}'`
-      ip rule del to $ROUTEIP table `echo $WANIF | cut -d 'n' -f 2`00
+      ip route del $ROUTEIP via $WANIP dev $WANIF
 
       if [ $RCNT -eq $PINGCOUNT ]; then
         break;
