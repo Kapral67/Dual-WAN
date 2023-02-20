@@ -108,7 +108,7 @@ while true; do
   date '+%s %d%b%g %H%M%S' > $HBFILE	# heartbeat for process monitor
 
   PCNT=`ping -c $PINGCOUNT -W $PINGCOUNT -w $PINGCOUNT -s $PINGSIZE -I $WANIF $WANIP \
-    2>/dev/null  | awk '/packets received/ {print $4}'`
+    2>/dev/null | awk '/packets received/ {print $4}'`
 
   if [ -z $PCNT ]; then
     PCNT=0
@@ -312,7 +312,7 @@ while true; do
     esac
   fi
 
-  sleep $(($PINGRATE-$PINGRATEADJ))
+  sleep $PINGRATE
 done
 
 rm -f $PIDFILE
