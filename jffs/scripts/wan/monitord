@@ -96,7 +96,7 @@ while true; do
       for WANNAME in $WANLIST; do
         $WANDIR/linkd $WANNAME &
       done
-      break;
+      break
     fi
   done
 
