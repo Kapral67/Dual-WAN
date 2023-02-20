@@ -33,7 +33,7 @@ readiface () {
   FAILCOUNT=`echo $WANCFG | cut -f5 -d' '`     # number of failures to down
   RESTOREDELAY=`echo $WANCFG | cut -f6 -d' '`  # failback delay time (sec)
   WANIF=$(nvram get ${WANNAME}_ifname)         # WAN target interface
-  ROUTEIPCNT=`echo $ROUTEIPS | wc -w`          # count of route IP addresses
+  ROUTEIPCNT=`echo $DNSLIST | wc -w`          # count of route IP addresses
   wanlogger $LOG_INFO  "$BN: $WANNAME configuration $PINGRATE $PINGCOUNT $PINGSIZE $FAILCOUNT $RESTOREDELAY #09 linkd"
   WANIP=$(nvram get ${WANNAME}_ping)           # WAN target IP address
   if [ -z $WANIP ]; then                       # Check ping IP override
@@ -119,7 +119,7 @@ while true; do
   else                               # link ping test succeeded, check route
     RCNT=$PINGCOUNT                  # set RCNT in case route check is disabled
 
-    for ROUTEIP in $ROUTEIPS; do
+    for ROUTEIP in $DNSLIST; do
       RCNT=`ping -c $PINGCOUNT -w $PINGCOUNT -I $WANIF $ROUTEIP 2>/dev/null \
         | awk '/packets received/ {print $4}'`
 

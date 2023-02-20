@@ -111,18 +111,6 @@ case $1 in
 esac
 
 if [ $RETVAL -eq 0 ]; then
-  # add routes for route status checks
-  for WAN in $WANLIST; do
-    for ROUTEIP in $ROUTEIPS; do
-      ip route del $ROUTEIP via `nvram get ${WAN}_ifname`
-    done
-  done
-
-  for WAN in $WANLIST; do
-    for ROUTEIP in $ROUTEIPS; do
-      ip route add $ROUTEIP via `nvram get ${WAN}_gateway` dev `nvram get ${WAN}_ifname`
-    done
-  done
 
   # add route(s) for Grande router segment
   ip route del $MODEM1_CIDR dev $MODEM1_IFNAME

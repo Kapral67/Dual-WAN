@@ -33,10 +33,6 @@ if [ "`nvram get wan_dns`" != "$DNSLIST" ]; then
   nvram set wan_dns="$DNSLIST"
   COMMITNEEDED=1
 fi
-if [ "`nvram get route_ips`" != "$ROUTEIPS" ]; then
-  nvram set route_ips="$ROUTEIPS"
-  COMMITNEEDED=1
-fi
 if [ "`nvram get ntp_server`" != "$NTPIP" ]; then
   nvram set ntp_server="$NTPIP"
   COMMITNEEDED=1
