@@ -33,7 +33,9 @@ jobs:
             console.log(error);
           }
     - uses: actions/checkout@v3
-    - run: |
+    - id: package
+      run: |
+        echo "branch=$(git branch --show-current)" >> $GITHUB_OUTPUT
         tar cvf onchange.tar --directory=jffs/etc/config .
         tar cvf scripts.tar --directory=jffs/scripts/wan .
         tar cvf bin.tar --directory=jffs/bin .
@@ -41,5 +43,6 @@ jobs:
       with:
         artifacts: "onchange.tar,scripts.tar,bin.tar"
         prerelease: true
+        commit: ${{ steps.package.outputs.branch }}
         tag: "dev"
         makeLatest: true
