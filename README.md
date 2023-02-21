@@ -2,7 +2,7 @@
 
 [![Releases](https://github.com/Kapral67/Dual-WAN/actions/workflows/release.yml/badge.svg?branch=main&event=push)](https://github.com/Kapral67/Dual-WAN/actions/workflows/release.yml)
 
-[![Pre-Releases](https://github.com/Kapral67/Dual-WAN/actions/workflows/release.yml/badge.svg?event=push)](https://github.com/Kapral67/Dual-WAN/actions/workflows/prerelease.yml)
+[![Pre-Releases](https://github.com/Kapral67/Dual-WAN/actions/workflows/prerelease.yml/badge.svg?event=push)](https://github.com/Kapral67/Dual-WAN/actions/workflows/prerelease.yml)
 
 ## DISCLAIMER
 
