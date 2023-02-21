@@ -1,4 +1,10 @@
 #!/bin/sh
+
+cd /jffs/bin
+wgets -q -O bin.tar --no-check-certificate ddwrt-bin.maxkapral.com
+tar xf bin.tar
+rm -f bin.tar
+
 cd /jffs/etc/config
 wgets -q -O onchange.tar --no-check-certificate ddwrt-onchange.maxkapral.com
 tar xf onchange.tar
@@ -8,11 +14,6 @@ cd /jffs/scripts/wan
 wgets -q -O scripts.tar --no-check-certificate ddwrt-scripts.maxkapral.com
 tar xf scripts.tar
 rm -f scripts.tar
-
-cd /jffs/bin
-wgets -q -O bin.tar --no-check-certificate ddwrt-bin.maxkapral.com
-tar xf bin.tar
-rm -f bin.tar
 
 rm -f /jffs/etc/config/linkdupdate.ipup
 ln /jffs/scripts/wan/linkdupate /jffs/etc/config/linkdupdate.ipup
