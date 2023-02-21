@@ -3,6 +3,7 @@
 # clock update script - run by cron
 #
 # Author: David Medders
+# Editor: Maxwell Kapral
 ##########################################################################
 
 . /jffs/scripts/wan/global
