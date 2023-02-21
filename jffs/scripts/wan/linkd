@@ -22,7 +22,6 @@ fi
 WANNAME=$1                              # wan interface name
 STATFILE=$TMPDIR/$STATROOT.$WANNAME     # status file
 HBFILE=$TMPDIR/$HBROOT.$WANNAME         # heartbeat file
-PIDFILE=$PIDDIR/linkd${WANNAME}.pid     # PID file
 
 readiface () {
   . /jffs/scripts/wan/global
@@ -65,14 +64,12 @@ if [ -z "$WANIP" ]; then
   exit 2
 fi
 
-kill -0 `cat $PIDFILE` >/dev/null
-if [ $? -eq 0 ]; then
+PLIST=`ps | grep -E "\{linkd\}.*linkd ${WANNAME}" | awk '{print $1}'`
+if [ ! -z "$PLIST" ]; then
   echo "$BN: linkd already running for $WANNAME"
   wanlogger $LOG_WARNING "$BN: linkd already running for $WANNAME"
   exit 3
 fi
-
-echo $$ > $PIDFILE
 
 FAILCHK=0                       # count of link ping failures
 RFAILCHK=0                      # count of route ping failures
@@ -190,7 +187,6 @@ while true; do
         ;;
       *)
         wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-        rm -f $PIDFILE
         exit 5
         ;;
     esac
@@ -244,7 +240,6 @@ while true; do
         ;;
       *)
         wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-        rm -f $PIDFILE
         exit 5
         ;;
     esac
@@ -309,7 +304,6 @@ while true; do
         ;;
       *)
         wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-        rm -f $PIDFILE
         exit 5
         ;;
     esac
@@ -317,8 +311,6 @@ while true; do
 
   sleep $PINGRATE
 done
-
-rm -f $PIDFILE
 
 wanlogger $LOG_ERR "$BN: abnormal exit"
 exit 6

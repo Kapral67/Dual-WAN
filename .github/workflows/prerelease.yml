@@ -1,8 +1,8 @@
-name: Releases
+name: Pre-Releases
 
 on:
   push:
-    branches: main
+    branches: '!main'
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
             const { data } = await github.rest.repos.getReleaseByTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag: 'latest'
+              tag: 'dev'
             });
             github.rest.repos.deleteRelease({
               owner: context.repo.owner,
@@ -27,7 +27,7 @@ jobs:
             github.rest.git.deleteRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'tags/latest'
+              ref: 'tags/dev'
             });
           } catch (error) {
             console.log(error);
@@ -40,6 +40,6 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "onchange.tar,scripts.tar,bin.tar"
-        prerelease: false
-        tag: "latest"
+        prerelease: true
+        tag: "dev"
         makeLatest: true

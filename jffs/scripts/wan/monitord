@@ -55,7 +55,7 @@ wanlogger $LOG_DEBUG "$BN: starting"
 
 PIDFILE=$PIDDIR/monitord.pid	# PID file
 
-kill -0 `cat $PIDFILE` >/dev/null
+kill -0 `cat $PIDFILE` >/dev/null 2>&1
 if [ $? -eq 0 ]; then
   wanlogger $LOG_ERR "$BN: monitord already running"
   exit 1
@@ -75,7 +75,7 @@ while true; do
   for WAN in $WANLIST; do
     UDHCPCPID=$PIDDIR/udhcpc-${WAN}.pid
 
-    kill -0 `cat $UDHCPCPID` > /dev/null
+    kill -0 `cat $UDHCPCPID` >/dev/null 2>&1
     if [ $? -ne 0 ]; then    # launch udhcpc
       wanlogger $LOG_NOTICE "$BN: restarting udhcpc for $WAN #08 udhcpc"
       rm -f $UDHCPCPID
@@ -89,14 +89,15 @@ while true; do
     HBRATE=`eval echo $"HBRATE${WAN}"`
     checkhb $WAN $HBRATE
     if [ $? -ne 0 ]; then # heartbeat fail
-      LINKDPID=$PIDDIR/linkd${WAN}.pid
-      wanlogger $LOG_WARNING "$BN: heartbeat fail for linkd, killing all..."
-      killall linkd
-      wanlogger $LOG_WARNING "$BN: restarting linkd..."
-      for WANNAME in $WANLIST; do
-        $WANDIR/linkd $WANNAME &
-      done
-      break
+      wanlogger $LOG_WARNING "$BN: heartbeat fail for linkd ${WAN}, killing ..."
+      PLIST=`ps | grep -E "\{linkd\}.*linkd ${WAN}" | awk '{print $1}'`
+      if [ ! -z "$PLIST" ]; then
+        for PID in $PLIST; do
+          kill -9 $PID >/dev/null 2>&1
+        done
+      fi
+      wanlogger $LOG_WARNING "$BN: restarting linkd ${WAN}..."
+      $WANDIR/linkd $WAN &
     fi
   done
 

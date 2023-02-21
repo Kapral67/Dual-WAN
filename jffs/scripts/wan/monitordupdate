@@ -14,7 +14,7 @@ PIDFILE=$PIDDIR/monitord.pid
 if [ -f $PIDFILE ]; then
   wanlogger $LOG_DEBUG "$BN: sending SIGUSR2 to monitord"
   echo "$BN: sending SIGUSR2 to monitord"
-  kill -SIGUSR2 `cat $PIDFILE`
+  kill -SIGUSR2 `cat $PIDFILE` >/dev/null 2>&1
 else
   wanlogger $LOG_DEBUG "$BN: no PID file for monitord"
   echo "$BN: no PID file for monitord"

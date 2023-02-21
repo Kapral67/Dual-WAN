@@ -18,11 +18,11 @@ if [ -f $STATFILE ]; then   # check that status file exists
   WANSTAT=`cat $STATFILE | cut -f1 -d' '`
 
   if [ $WANSTAT = "recovering" ]; then
-    PIDFILE=$PIDDIR/linkd${1}.pid
-
-    kill -0 `cat $PIDFILE` >/dev/null
-    if [ $? -eq 0 ]; then   # linkd found, okay to send SIGUSR1
-      kill -SIGUSR1 `cat $PIDFILE`
+    PLIST=`ps | grep -E "\{linkd\}.*linkd ${1}" | awk '{print $1}'`
+    if [ ! -z "$PLIST" ]; then
+      for PID in $PLIST; do
+        kill -SIGUSR1 $PID >/dev/null 2>&1
+      done
       rm $STATFILE
       RETVAL=0
     else

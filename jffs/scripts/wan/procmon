@@ -36,10 +36,10 @@ wanlogger $LOG_DEBUG "$BN: date `date '+%s'`"
 if [ `date '+%s'` -gt $(($HBTIME+$HBWAIT)) ]; then # heartbeat fail
   wanlogger $LOG_WARNING "$BN: heartbeat fail for monitord, restarting #08 monitord"
 
-  kill -0 `cat $PIDFILE` >/dev/null
+  kill -0 `cat $PIDFILE` >/dev/null 2>&1
   if [ $? -eq 0 ]; then     # monitord is still in the process table
     wanlogger $LOG_ERR "$BN: monitord in process table, killing"
-    kill -9 `cat $PIDFILE`
+    kill -9 `cat $PIDFILE` >/dev/null 2>&1
     sleep 5
   fi
 

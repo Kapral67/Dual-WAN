@@ -81,11 +81,11 @@ case "$1" in
       $DNSUPDATE
 
       # send SIGUSR2 to associated linkd to force config re-read
-      LINKDPID=$PIDDIR/linkd${WAN}.pid
-
-      kill -0 `cat $LINKDPID` >/dev/null
-      if [ $? -eq 0 ]; then  # linkd found, okay to send SIGUSR2
-        kill -SIGUSR2 `cat $LINKDPID`
+      PLIST=`ps | grep -E "\{linkd\}.*linkd ${WAN}" | awk '{print $1}'`
+      if [ ! -z "$PLIST" ]; then
+        for PID in $PLIST; do
+          kill -SIGUSR2 $PID >/dev/null 2>&1
+        done
       fi
     fi
     ;;
