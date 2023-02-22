@@ -90,13 +90,10 @@ while true; do
     checkhb $WAN $HBRATE
     if [ $? -ne 0 ]; then # heartbeat fail
       LINKDPID=$PIDDIR/linkd${WAN}.pid
-      wanlogger $LOG_WARNING "$BN: heartbeat fail for linkd, killing all..."
-      killall linkd
+      wanlogger $LOG_WARNING "$BN: heartbeat fail for linkd ${WAN}, killing..."
+      kill -9 $LINKDPID
       wanlogger $LOG_WARNING "$BN: restarting linkd..."
-      for WANNAME in $WANLIST; do
-        $WANDIR/linkd $WANNAME &
-      done
-      break
+      $WANDIR/linkd $WANNAME &
     fi
   done
 
