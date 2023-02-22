@@ -15,8 +15,6 @@ FORCEROUTE=$TMPDIR/force.route
 #LOGLEVEL=$LOG_DEBUG   # overriding LOGLEVEL
 #FILELEVEL=$LOGLEVEL
 
-CHANGEWANPID=$PIDDIR/changewan.pid
-
 wanlogger $LOG_DEBUG "$BN: starting"
 
 getstatus () {
@@ -50,16 +48,28 @@ getstatus () {
   esac
 }
 
+checkSolo () {
+  PLIST=`ps | grep -E "\{changewan\}" | awk '{print $1}'`
+  for PID in $PLIST; do
+    if [ $PID -ne $$ ]; then
+      return 1;
+    fi
+  done
+  return 0;
+}
+
 # check that no other changewan is running
 I=0
 ST=$((5+$$%10))    # randomize sleep time with PID
-while [ -f $CHANGEWANPID ] && [ $I -lt 4 ]; do
+checkSolo
+NS=$?
+while [ $NS -ne 0 ] && [ $I -lt 4 ]; do
   wanlogger $LOG_WARNING "$BN: another $BN is running, pass $I, sleeping $ST"
   sleep $ST
   I=$(($I+1))
+  checkSolo
+  NS=$?
 done
-
-echo $$ > $CHANGEWANPID
 
 if [ $# -eq 1 ] && [ "$1" = "force" ]; then
   ROUTESTAT="force"    # force configroutes to run
@@ -80,7 +90,7 @@ done
 
 wanlogger $LOG_DEBUG "$BN: WANSTAT $WANSTAT"
 
-if [ -f $FORCEROUTE ]; then  # a route is being forced
+if [ -f "$FORCEROUTE" ]; then  # a route is being forced
   NEWSTAT=`cat $FORCEROUTE | cut -f1 -d' '`
   wanlogger $LOG_INFO "$BN: route forced to $NEWSTAT at `date '+%d%b%g %H%M%S'`"
 else
@@ -110,8 +120,6 @@ if [ "$NEWSTAT" != "$ROUTESTAT" ]; then
 fi
 
 wanlogger $LOG_DEBUG "$BN: complete"
-
-rm $CHANGEWANPID
 
 exit 0
 

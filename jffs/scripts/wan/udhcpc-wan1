@@ -25,12 +25,11 @@ wanlogger $LOG_DEBUG "$BN: start $1, $ip, $router, $interface, $dns, $$"
 CUR_IP=`nvram get ${WAN}_ipaddr`
 CUR_GW=`nvram get ${WAN}_gateway`
 
-if [ $ip != $CUR_IP ] || \
-  [ $router != $CUR_GW ]; then
+if [ "$ip" != "$CUR_IP" ] || [ "$router" != "$CUR_GW" ]; then
   wanlogger $LOG_INFO "$BN: config change ip $ip $CUR_IP, gateway $router $CUR_GW"
 fi
 
-if [ ! -z $ip ] && [ $ip = $router ]; then  # see Note 1 below
+if [ -n "$ip" ] && [ "$ip" = "$router" ]; then  # see Note 1 below
   wanlogger $LOG_ERR "$BN: config change error gateway ip $ip, correcting to $CUR_GW"
   $SENDSTATUS "DHCP config error" "$BN: Gateway corrected - changed from $router to $CUR_GW" &
   router=$CUR_GW
@@ -51,15 +50,14 @@ case "$1" in
 
     wanlogger $LOG_DEBUG "$BN: configured IP $CFGIP"
 
-    if [ "$CFGIP" != "$ip" ] || [ -z $ip ] || [ $ip != $CUR_IP ] \
-      || [ $route != $CUR_GW ]; then
+    if [ "$CFGIP" != "$ip" ] || [ -z "$ip" ] || [ "$ip" != "$CUR_IP" ] || [ "$route" != "$CUR_GW" ]; then
       wanlogger $LOG_INFO "$BN: IP new - $ip $CUR_IP, GW new - $router $CUR_GW"
 
       ip addr flush dev $interface
 
       ip addr add $ip/$subnet dev $interface
 
-      if [ $ip != $CUR_IP ]; then
+      if [ "$ip" != "$CUR_IP" ]; then
         nvram set ddns2_time=0
       fi
 
@@ -82,7 +80,7 @@ case "$1" in
 
       # send SIGUSR2 to associated linkd to force config re-read
       PLIST=`ps | grep -E "\{linkd\}.*linkd ${WAN}" | awk '{print $1}'`
-      if [ ! -z "$PLIST" ]; then
+      if [ -n "$PLIST" ]; then
         for PID in $PLIST; do
           kill -SIGUSR2 $PID >/dev/null 2>&1
         done

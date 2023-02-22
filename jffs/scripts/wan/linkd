@@ -36,13 +36,13 @@ readiface () {
   ROUTEIPCNT=`echo $DNSLIST | wc -w`          # count of route IP addresses
   wanlogger $LOG_INFO  "$BN: $WANNAME configuration $PINGRATE $PINGCOUNT $PINGSIZE $FAILCOUNT $RESTOREDELAY #09 linkd"
   WANIP=$(nvram get ${WANNAME}_ping)           # WAN target IP address
-  if [ -z $WANIP ]; then                       # Check ping IP override
+  if [ -z "$WANIP" ]; then                       # Check ping IP override
     WANIP=$(nvram get ${WANNAME}_gateway)
   fi
 }
 
 trap '
-  if [ $WANSTAT = "recovering" ]; then
+  if [ "$WANSTAT" = "recovering" ]; then
     STATE1=0
     wanlogger $LOG_INFO "$BN: $WANNAME forced up"
   else
@@ -65,11 +65,13 @@ if [ -z "$WANIP" ]; then
 fi
 
 PLIST=`ps | grep -E "\{linkd\}.*linkd ${WANNAME}" | awk '{print $1}'`
-if [ ! -z "$PLIST" ]; then
-  echo "$BN: linkd already running for $WANNAME"
-  wanlogger $LOG_WARNING "$BN: linkd already running for $WANNAME"
-  exit 3
-fi
+for PID in $PLIST; do
+  if [ $PID -ne $$ ]; then
+    echo "$BN: linkd already running for $WANNAME"
+    wanlogger $LOG_WARNING "$BN: linkd already running for $WANNAME"
+    exit 3
+  fi
+done
 
 FAILCHK=0                       # count of link ping failures
 RFAILCHK=0                      # count of route ping failures
@@ -78,22 +80,22 @@ FAIL2=0                         # readable last failure time
 STATE1=`date '+%s'`             # state time in seconds
 STATE2=`date '+%d%b%g %H%M%S'`  # readable state time
 
-if [ -f $STATFILE ]; then              # read existing status file
+if [ -f "$STATFILE" ]; then              # read existing status file
   WANSTAT=`cat $STATFILE | cut -f1 -d' '`
   FAIL2=`cat $STATFILE | cut -f7- -d' '`
   wanlogger $LOG_DEBUG "$BN: read $WANNAME WANSTAT $WANSTAT"
-  if [ $WANSTAT = "down" ]; then       # link down, set FAILCHK
+  if [ "$WANSTAT" = "down" ]; then       # link down, set FAILCHK
     FAILCHK=$FAILCOUNT
-  elif [ $WANSTAT = "link" ]; then    # route down, set RFAILCHK
+  elif [ "$WANSTAT" = "link" ]; then    # route down, set RFAILCHK
     RFAILCHK=$FAILCOUNT
-  elif [ $WANSTAT != "up" ] && [ $WANSTAT != "recovering" ]; then      # invalid status
+  elif [ "$WANSTAT" != "up" ] && [ "$WANSTAT" != "recovering" ]; then      # invalid status
     unset WANSTAT
   fi
 fi
 
 wanlogger $LOG_DEBUG "$BN: starting $WANNAME, WANSTAT $WANSTAT"
 
-if [ -z $WANSTAT ]; then   # no existing WANSTAT, initialize
+if [ -z "$WANSTAT" ]; then   # no existing WANSTAT, initialize
   wanlogger $LOG_DEBUG "$BN: initialize $WANNAME WANSTAT"
   WANSTAT="up"
   echo "$WANSTAT $STATE1 $STATE2 init" > $STATFILE
@@ -107,7 +109,7 @@ while true; do
   PCNT=`ping -c $PINGCOUNT -W $PINGCOUNT -w $PINGCOUNT -s $PINGSIZE -I $WANIF $WANIP \
     2>/dev/null | awk '/packets received/ {print $4}'`
 
-  if [ -z $PCNT ]; then
+  if [ -z "$PCNT" ]; then
     PCNT=0
   fi
 

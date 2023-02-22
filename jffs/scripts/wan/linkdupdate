@@ -17,15 +17,15 @@ wanupdate () {
   WAN=$1
   wanlogger $LOG_DEBUG "$BN: updating linkd configuration for $WAN"
   PLIST=`ps | grep -E "\{linkd\}.*linkd ${WAN}" | awk '{print $1}'`
-  if [ ! -z $PLIST ]; then
+  if [ -n "$PLIST" ]; then
     wanlogger $LOG_DEBUG "$BN: sending SIGUSR2 to $WAN linkd"
     echo "$BN: sending SIGUSR2 to $WAN linkd"
     for PID in $PLIST; do
       kill -SIGUSR2 $PID >/dev/null 2>&1
     done
   else
-    wanlogger $LOG_DEBUG "$BN: no PID file for $WAN linkd"
-    echo "$BN: no PID file for $WAN linkd"
+    wanlogger $LOG_DEBUG "$BN: no PID for $WAN linkd"
+    echo "$BN: no PID for $WAN linkd"
   fi
 }
 

@@ -10,14 +10,16 @@
 #LOGLEVEL=$LOG_DEBUG    # overriding LOGLEVEL
 #FILELEVEL=$LOGLEVEL
 
-PIDFILE=$PIDDIR/monitord.pid
-if [ -f $PIDFILE ]; then
+PLIST=`ps | grep -E "\{monitord\}" | awk '{print $1}'`
+if [ -n "$PLIST" ]; then
   wanlogger $LOG_DEBUG "$BN: sending SIGUSR2 to monitord"
   echo "$BN: sending SIGUSR2 to monitord"
-  kill -SIGUSR2 `cat $PIDFILE` >/dev/null 2>&1
+  for PID in $PLIST; do
+    kill -SIGUSR2 $PID >/dev/null 2>&1
+  done
 else
-  wanlogger $LOG_DEBUG "$BN: no PID file for monitord"
-  echo "$BN: no PID file for monitord"
+  wanlogger $LOG_DEBUG "$BN: no PID for monitord"
+  echo "$BN: no PID for monitord"
 fi
 
 ##############################################################################

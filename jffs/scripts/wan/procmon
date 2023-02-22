@@ -16,14 +16,12 @@ wanlogger $LOG_DEBUG "$BN: starting"
 
 date '+%s %d%b%g %H%M%S' > $TMPDIR/$HBROOT.procmon    # heartbeat for procmon
 
-PIDFILE=$PIDDIR/monitord.pid
-
 HBFILE=$TMPDIR/$HBROOT.monitord    # heartbeat file
 HBWAIT=$(($CHECKRATE*2))           # maximum time to wait for monitor heartbeat
 
 HBTIME=`cat $HBFILE | cut -f1 -d' '`
 
-if [ -z $HBTIME ]; then   # allow time for hb write to complete, then reread
+if [ -z "$HBTIME" ]; then   # allow time for hb write to complete, then reread
   sleep 1                 # See Note 1 below
   HBTIME=`cat $HBFILE | cut -f1 -d' '`
   wanlogger $LOG_DEBUG "$BN: reread $HBTIME"
@@ -36,10 +34,12 @@ wanlogger $LOG_DEBUG "$BN: date `date '+%s'`"
 if [ `date '+%s'` -gt $(($HBTIME+$HBWAIT)) ]; then # heartbeat fail
   wanlogger $LOG_WARNING "$BN: heartbeat fail for monitord, restarting #08 monitord"
 
-  kill -0 `cat $PIDFILE` >/dev/null 2>&1
-  if [ $? -eq 0 ]; then     # monitord is still in the process table
+  PLIST=`ps | grep -E "\{monitord\}" | awk '{print $1}'`
+  if [ -n "$PLIST" ]; then     # monitord is still in the process table
     wanlogger $LOG_ERR "$BN: monitord in process table, killing"
-    kill -9 `cat $PIDFILE` >/dev/null 2>&1
+    for PID in $PLIST; do
+      kill -9 $PID >/dev/null 2>&1
+    done
     sleep 5
   fi
 

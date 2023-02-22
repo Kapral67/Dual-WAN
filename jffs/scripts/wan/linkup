@@ -14,12 +14,12 @@ fi
 
 STATFILE=$TMPDIR/$STATROOT.$1
 
-if [ -f $STATFILE ]; then   # check that status file exists
+if [ -f "$STATFILE" ]; then   # check that status file exists
   WANSTAT=`cat $STATFILE | cut -f1 -d' '`
 
-  if [ $WANSTAT = "recovering" ]; then
+  if [ "$WANSTAT" = "recovering" ]; then
     PLIST=`ps | grep -E "\{linkd\}.*linkd ${1}" | awk '{print $1}'`
-    if [ ! -z "$PLIST" ]; then
+    if [ -n "$PLIST" ]; then
       for PID in $PLIST; do
         kill -SIGUSR1 $PID >/dev/null 2>&1
       done
