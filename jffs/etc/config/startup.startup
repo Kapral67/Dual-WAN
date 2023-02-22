@@ -8,9 +8,7 @@ sleep 5
 /jffs/scripts/wan/firewall
 /jffs/scripts/wan/route
 /jffs/scripts/wan/monitord &
-sleep 1
-/jffs/scripts/wan/clockupdate
-/jffs/scripts/wan/dnsupdate
+sleep 5
 
 # Adding my personal certifcate for https
 if [ -f $(nvram get cert_pem) ]; then
@@ -27,3 +25,7 @@ if [ -d /jffs/opt ]; then
   mount -o bind /jffs/opt /opt
   /opt/etc/init.d/rc.unslung start
 fi
+
+sleep 25 # monitord takes sometime to get going
+/jffs/scripts/wan/clockupdate
+/jffs/scripts/wan/dnsupdate
