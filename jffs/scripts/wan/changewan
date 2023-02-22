@@ -72,7 +72,7 @@ WANSTAT=0
 
 for WAN in $WANLIST; do   # assemble WANSTAT for each link
   getstatus $WAN
-  WANSTAT=$(($WANSTAT+($?<<$I))
+  WANSTAT=$(($WANSTAT+($?<<$I)))
 
   wanlogger $LOG_DEBUG "$BN: $WAN $I $WANSTAT"
   I=$(($I+2))
