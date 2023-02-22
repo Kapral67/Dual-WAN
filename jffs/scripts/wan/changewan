@@ -19,88 +19,88 @@ CHANGEWANPID=$PIDDIR/changewan.pid
 
 wanlogger $LOG_DEBUG "$BN: starting"
 
-getstatus () {
+getstatus() {
   if [ $# -ne 1 ]; then
     echo "Usage: getstatus <WAN>"
     wanlogger $LOG_ERR "Usage: getstatus <WAN>"
     return 0
   fi
 
-  WANSTATUS=`cat $TMPDIR/$STATROOT.$1 | cut -f1 -d' '`
+  WANSTATUS=$(cat $TMPDIR/$STATROOT.$1 | cut -f1 -d' ')
 
   wanlogger $LOG_DEBUG "$BN: getstatus $1 $WANSTATUS"
 
   case $WANSTATUS in
-    "up")
-      return 3
-      ;;
-    "recovering")
-      return 2
-      ;;
-    "link")
-      return 1
-      ;;
-    "down")
-      return 0
-      ;;
-    *)
-      wanlogger $LOG_ERR "getstatus: unknown status $WANSTATUS for $1"
-      return 0
-      ;;
+  "up")
+    return 3
+    ;;
+  "recovering")
+    return 2
+    ;;
+  "link")
+    return 1
+    ;;
+  "down")
+    return 0
+    ;;
+  *)
+    wanlogger $LOG_ERR "getstatus: unknown status $WANSTATUS for $1"
+    return 0
+    ;;
   esac
 }
 
 # check that no other changewan is running
 I=0
-ST=$((5+$$%10))    # randomize sleep time with PID
+ST=$((5 + $$ % 10)) # randomize sleep time with PID
 while [ -f $CHANGEWANPID ] && [ $I -lt 4 ]; do
   wanlogger $LOG_WARNING "$BN: another $BN is running, pass $I, sleeping $ST"
   sleep $ST
-  I=$(($I+1))
+  I=$(($I + 1))
 done
 
-echo $$ > $CHANGEWANPID
+echo $$ >$CHANGEWANPID
 
 if [ $# -eq 1 ] && [ "$1" = "force" ]; then
-  ROUTESTAT="force"    # force configroutes to run
+  ROUTESTAT="force" # force configroutes to run
 else
-  ROUTESTAT=`cat $ROUTESTATFILE | cut -f1 -d' '`
+  ROUTESTAT=$(cat $ROUTESTATFILE | cut -f1 -d' ')
 fi
 
 I=0
 WANSTAT=0
 
-for WAN in $WANLIST; do   # assemble WANSTAT for each link
+for WAN in $WANLIST; do # assemble WANSTAT for each link
   getstatus $WAN
-  WANSTAT=$(($WANSTAT+($?<<$I)))
+  WANSTAT=$(($WANSTAT + ($? << $I)))
 
   wanlogger $LOG_DEBUG "$BN: $WAN $I $WANSTAT"
-  I=$(($I+2))
+  I=$(($I + 2))
 done
 
 wanlogger $LOG_DEBUG "$BN: WANSTAT $WANSTAT"
 
-if [ -f $FORCEROUTE ]; then  # a route is being forced
-  NEWSTAT=`cat $FORCEROUTE | cut -f1 -d' '`
-  wanlogger $LOG_INFO "$BN: route forced to $NEWSTAT at `date '+%d%b%g %H%M%S'`"
+if [ -f $FORCEROUTE ]; then # a route is being forced
+  NEWSTAT=$(cat $FORCEROUTE | cut -f1 -d' ')
+  wanlogger $LOG_INFO "$BN: route forced to $NEWSTAT at $(date '+%d%b%g %H%M%S')"
 else
   case $WANSTAT in
-     11|7|6|3|2)
-       NEWSTAT=wan1
-       ;;
-     14|13|12|9|8)
-       NEWSTAT=wan2
-       ;;
-     15|10)
-       NEWSTAT=default
-       ;;
-     5|4|1|0)
-       NEWSTAT=down
-       ;;
-     *)                         # invalid state
-       wanlogger $LOG_ERR "$BN: invalid WANSTAT $WANSTAT"
-       exit 1
-       ;;
+  11 | 7 | 6 | 3 | 2)
+    NEWSTAT=wan1
+    ;;
+  14 | 13 | 12 | 9 | 8)
+    NEWSTAT=wan2
+    ;;
+  15 | 10)
+    NEWSTAT=default
+    ;;
+  5 | 4 | 1 | 0)
+    NEWSTAT=down
+    ;;
+  *) # invalid state
+    wanlogger $LOG_ERR "$BN: invalid WANSTAT $WANSTAT"
+    exit 1
+    ;;
   esac
 fi
 
@@ -108,8 +108,8 @@ wanlogger $LOG_DEBUG "$BN: NEWSTAT $NEWSTAT ROUTESTAT $ROUTESTAT"
 
 if [ "$NEWSTAT" != "$ROUTESTAT" ]; then
   $CONFIGROUTES $NEWSTAT
-  wanlogger $LOG_INFO "$BN: Route changed from $ROUTESTAT to $NEWSTAT at `date '+%d%b%g %H%M%S'`"
-  $SENDSTATUS $BN "Route changed from $ROUTESTAT to $NEWSTAT at `date '+%d%b%g %H%M%S'`" 2>/dev/null >&2 &
+  wanlogger $LOG_INFO "$BN: Route changed from $ROUTESTAT to $NEWSTAT at $(date '+%d%b%g %H%M%S')"
+  $SENDSTATUS $BN "Route changed from $ROUTESTAT to $NEWSTAT at $(date '+%d%b%g %H%M%S')" 2>/dev/null >&2 &
 fi
 
 wanlogger $LOG_DEBUG "$BN: complete"
@@ -117,4 +117,3 @@ wanlogger $LOG_DEBUG "$BN: complete"
 rm $CHANGEWANPID
 
 exit 0
-

@@ -15,7 +15,6 @@
 # Editor: Maxwell Kapral
 #############################################################################
 
-
 . /jffs/scripts/wan/global
 
 #LOGLEVEL=$LOG_DEBUG   # overriding LOGLEVEL
@@ -36,12 +35,11 @@ HOST=$(nvram get router_name).$(nvram get wan_get_domain)
 FROM=root@$HOST
 NAME=root
 
-WANIF=`ip route | head -1 | cut -f5 -d' '`
-WANIP=`ip route | grep $WANIF | grep src | awk '{print $9}'`
-SRCDOMAIN=`nslookup $WANIP | tail -1 | cut -f4 -d' '`
+WANIF=$(ip route | head -1 | cut -f5 -d' ')
+WANIP=$(ip route | grep $WANIF | grep src | awk '{print $9}')
+SRCDOMAIN=$(nslookup $WANIP | tail -1 | cut -f4 -d' ')
 
 #exit 1  # kill messages
-
 
 if [ "$SRCDOMAIN" = "" ]; then
   SRCDOMAIN=$HOST
@@ -50,7 +48,7 @@ fi
 for DEST in $DESTS; do
 
   sendmail -S${SERVER} -f${FROM} -d${SRCDOMAIN} \
-   -au${USER} -ap${PASSWORD} $DEST <<EOF
+    -au${USER} -ap${PASSWORD} $DEST <<EOF
 Subject: $1
 
 $2
@@ -58,4 +56,3 @@ $2
 EOF
 
 done
-

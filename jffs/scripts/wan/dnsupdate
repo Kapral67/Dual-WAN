@@ -7,4 +7,4 @@
 # Editor: Maxwell Kapral
 ##############################################################################
 
-echo "nameserver `nvram get wan_dns`" > /etc/resolv.conf
+echo "nameserver $(nvram get wan_dns)" >/etc/resolv.conf

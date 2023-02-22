@@ -13,14 +13,14 @@
 #LOGLEVEL=$LOG_DEBUG    # overriding LOGLEVEL
 #FILELEVEL=$LOGLEVEL
 
-wanupdate () {
+wanupdate() {
   WAN=$1
   wanlogger $LOG_DEBUG "$BN: updating linkd configuration for $WAN"
   PIDFILE=$PIDDIR/linkd${WAN}.pid
   if [ -f $PIDFILE ]; then
     wanlogger $LOG_DEBUG "$BN: sending SIGUSR2 to $WAN linkd"
     echo "$BN: sending SIGUSR2 to $WAN linkd"
-    kill -SIGUSR2 `cat $PIDFILE`
+    kill -SIGUSR2 $(cat $PIDFILE)
   else
     wanlogger $LOG_DEBUG "$BN: no PID file for $WAN linkd"
     echo "$BN: no PID file for $WAN linkd"

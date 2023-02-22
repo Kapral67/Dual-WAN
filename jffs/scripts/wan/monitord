@@ -16,9 +16,9 @@
 
 CRONALARM=$TMPDIR/cronalarm
 
-HBFILE=$TMPDIR/$HBROOT.monitord                # heartbeat file
+HBFILE=$TMPDIR/$HBROOT.monitord # heartbeat file
 
-reload () {  # reload global configuration
+reload() { # reload global configuration
   . /jffs/scripts/wan/global
 }
 
@@ -27,24 +27,24 @@ trap '
   wanlogger $LOG_INFO "$BN: Reload configuration #08 monitord"
 ' SIGUSR2
 
-checkhb () {
+checkhb() {
   if [ $# -ne 2 ]; then
     echo "Usage: gethb <process> <fail time>"
     wanlogger $LOG_ERR "Usage: gethb <process> <fail time>"
     return 1
   fi
 
-  HBTIME=`cat $TMPDIR/$HBROOT.$1 | cut -f1 -d' '`
+  HBTIME=$(cat $TMPDIR/$HBROOT.$1 | cut -f1 -d' ')
 
   wanlogger $LOG_DEBUG "$BN: gethb $1 $2 $HBTIME"
 
-  if [ -z $HBTIME ]; then   # allow time for hb write to complete, then reread
-    sleep 1                 # See Note 1 below
-    HBTIME=`cat $TMPDIR/$HBROOT.$1 | cut -f1 -d' '`
+  if [ -z $HBTIME ]; then # allow time for hb write to complete, then reread
+    sleep 1               # See Note 1 below
+    HBTIME=$(cat $TMPDIR/$HBROOT.$1 | cut -f1 -d' ')
     wanlogger $LOG_DEBUG "$BN: gethb $1 $2 reread $HBTIME"
   fi
 
-  if [ `date +%s` -gt $(($HBTIME+$2)) ]; then
+  if [ $(date +%s) -gt $(($HBTIME + $2)) ]; then
     return 1
   else
     return 0
@@ -53,40 +53,40 @@ checkhb () {
 
 wanlogger $LOG_DEBUG "$BN: starting"
 
-PIDFILE=$PIDDIR/monitord.pid	# PID file
+PIDFILE=$PIDDIR/monitord.pid # PID file
 
-kill -0 `cat $PIDFILE` >/dev/null
+kill -0 $(cat $PIDFILE) >/dev/null
 if [ $? -eq 0 ]; then
   wanlogger $LOG_ERR "$BN: monitord already running"
   exit 1
 fi
 
-echo $$ > $PIDFILE
+echo $$ >$PIDFILE
 
-date '+%s %d%b%g %H%M%S' > $TMPDIR/$HBROOT.procmon # allow time for cron to run
+date '+%s %d%b%g %H%M%S' >$TMPDIR/$HBROOT.procmon # allow time for cron to run
 rm $CRONALARM
 
 while true; do
-  date '+%s %d%b%g %H%M%S' > $HBFILE        # heartbeat for process monitor
+  date '+%s %d%b%g %H%M%S' >$HBFILE # heartbeat for process monitor
 
-  sleep $CHECKRATE    # delay between status checks
+  sleep $CHECKRATE # delay between status checks
 
   # check udhcpc daemons
   for WAN in $WANLIST; do
     UDHCPCPID=$PIDDIR/udhcpc-${WAN}.pid
 
-    kill -0 `cat $UDHCPCPID` > /dev/null
-    if [ $? -ne 0 ]; then    # launch udhcpc
+    kill -0 $(cat $UDHCPCPID) >/dev/null
+    if [ $? -ne 0 ]; then # launch udhcpc
       wanlogger $LOG_NOTICE "$BN: restarting udhcpc for $WAN #08 udhcpc"
       rm -f $UDHCPCPID
-      udhcpc -i `nvram get ${WAN}_ifname` -p $UDHCPCPID -s $WANDIR/udhcpc-${WAN} &
-      sleep 5  # allow time for udhcpc daemon start
+      udhcpc -i $(nvram get ${WAN}_ifname) -p $UDHCPCPID -s $WANDIR/udhcpc-${WAN} &
+      sleep 5 # allow time for udhcpc daemon start
     fi
   done
 
   # check linkd daemons
   for WAN in $WANLIST; do
-    HBRATE=`eval echo $"HBRATE${WAN}"`
+    HBRATE=$(eval echo $"HBRATE${WAN}")
     checkhb $WAN $HBRATE
     if [ $? -ne 0 ]; then # heartbeat fail
       LINKDPID=$PIDDIR/linkd${WAN}.pid
@@ -101,18 +101,18 @@ while true; do
 
   checkhb procmon $CRONALARMTIME
   if [ $? -ne 0 ]; then # heartbeat fail
-    wanlogger $LOG_DEBUG "$BN: `date +%s` HBTIME $HBTIME CRONALARMTIME $CRONALARMTIME"
-    if [ ! -f $CRONALARM ]; then   # cron alarm has not been issued
-      wanlogger $LOG_WARNING "$BN: heartbeat fail for procmon at `date '+%d%b%g %H%M%S'` hb `cat $TMPDIR/$HBROOT.procmon` #08 procmon"
-      $SENDSTATUS "cron error" "cron heartbeat failure at `date '+%d%b%g %H%M%S'` hb `cat $TMPDIR/$HBROOT.procmon`" &
-      stopservice $CROND   # restart cron daemon
+    wanlogger $LOG_DEBUG "$BN: $(date +%s) HBTIME $HBTIME CRONALARMTIME $CRONALARMTIME"
+    if [ ! -f $CRONALARM ]; then # cron alarm has not been issued
+      wanlogger $LOG_WARNING "$BN: heartbeat fail for procmon at $(date '+%d%b%g %H%M%S') hb $(cat $TMPDIR/$HBROOT.procmon) #08 procmon"
+      $SENDSTATUS "cron error" "cron heartbeat failure at $(date '+%d%b%g %H%M%S') hb $(cat $TMPDIR/$HBROOT.procmon)" &
+      stopservice $CROND # restart cron daemon
       startservice $CROND
-      touch $CRONALARM     # prevent multiple alarms
+      touch $CRONALARM # prevent multiple alarms
     fi
   elif [ -f $CRONALARM ]; then
-    wanlogger $LOG_WARNING "$BN: heartbeat resumed for procmon at `date '+%d%b%g %H%M%S'`"
-    $SENDSTATUS "cron resume" "cron heartbeat resumed at `date '+%d%b%g %H%M%S'`" &
-    rm $CRONALARM          # cron running again, reset alarm
+    wanlogger $LOG_WARNING "$BN: heartbeat resumed for procmon at $(date '+%d%b%g %H%M%S')"
+    $SENDSTATUS "cron resume" "cron heartbeat resumed at $(date '+%d%b%g %H%M%S')" &
+    rm $CRONALARM # cron running again, reset alarm
   fi
 done
 

@@ -19,25 +19,25 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-WANNAME=$1                              # wan interface name
-STATFILE=$TMPDIR/$STATROOT.$WANNAME     # status file
-HBFILE=$TMPDIR/$HBROOT.$WANNAME         # heartbeat file
-PIDFILE=$PIDDIR/linkd${WANNAME}.pid     # PID file
+WANNAME=$1                          # wan interface name
+STATFILE=$TMPDIR/$STATROOT.$WANNAME # status file
+HBFILE=$TMPDIR/$HBROOT.$WANNAME     # heartbeat file
+PIDFILE=$PIDDIR/linkd${WANNAME}.pid # PID file
 
-readiface () {
+readiface() {
   . /jffs/scripts/wan/global
 
-  WANCFG=`eval echo $"CONFIG${WANNAME}"`       # read linkd configuration
-  PINGRATE=`echo $WANCFG | cut -f2 -d' '`      # time delay between pings (sec)
-  PINGCOUNT=`echo $WANCFG | cut -f3 -d' '`     # number of pings for each check
-  PINGSIZE=`echo $WANCFG | cut -f4 -d' '`      # size of ICMP packets in bytes
-  FAILCOUNT=`echo $WANCFG | cut -f5 -d' '`     # number of failures to down
-  RESTOREDELAY=`echo $WANCFG | cut -f6 -d' '`  # failback delay time (sec)
+  WANCFG=$(eval echo $"CONFIG${WANNAME}")      # read linkd configuration
+  PINGRATE=$(echo $WANCFG | cut -f2 -d' ')     # time delay between pings (sec)
+  PINGCOUNT=$(echo $WANCFG | cut -f3 -d' ')    # number of pings for each check
+  PINGSIZE=$(echo $WANCFG | cut -f4 -d' ')     # size of ICMP packets in bytes
+  FAILCOUNT=$(echo $WANCFG | cut -f5 -d' ')    # number of failures to down
+  RESTOREDELAY=$(echo $WANCFG | cut -f6 -d' ') # failback delay time (sec)
   WANIF=$(nvram get ${WANNAME}_ifname)         # WAN target interface
-  ROUTEIPCNT=`echo $DNSLIST | wc -w`          # count of route IP addresses
-  wanlogger $LOG_INFO  "$BN: $WANNAME configuration $PINGRATE $PINGCOUNT $PINGSIZE $FAILCOUNT $RESTOREDELAY #09 linkd"
-  WANIP=$(nvram get ${WANNAME}_ping)           # WAN target IP address
-  if [ -z $WANIP ]; then                       # Check ping IP override
+  ROUTEIPCNT=$(echo $DNSLIST | wc -w)          # count of route IP addresses
+  wanlogger $LOG_INFO "$BN: $WANNAME configuration $PINGRATE $PINGCOUNT $PINGSIZE $FAILCOUNT $RESTOREDELAY #09 linkd"
+  WANIP=$(nvram get ${WANNAME}_ping) # WAN target IP address
+  if [ -z $WANIP ]; then             # Check ping IP override
     WANIP=$(nvram get ${WANNAME}_gateway)
   fi
 }
@@ -57,7 +57,7 @@ trap '      # re-read interface configuration
 
 wanlogger $LOG_DEBUG "$BN: start $$ $WANNAME"
 
-readiface   # read interface configuration
+readiface # read interface configuration
 
 if [ -z "$WANIP" ]; then
   echo "$BN: WAN IP not found for $WANNAME"
@@ -65,253 +65,253 @@ if [ -z "$WANIP" ]; then
   exit 2
 fi
 
-kill -0 `cat $PIDFILE` >/dev/null
+kill -0 $(cat $PIDFILE) >/dev/null
 if [ $? -eq 0 ]; then
   echo "$BN: linkd already running for $WANNAME"
   wanlogger $LOG_WARNING "$BN: linkd already running for $WANNAME"
   exit 3
 fi
 
-echo $$ > $PIDFILE
+echo $$ >$PIDFILE
 
 FAILCHK=0                       # count of link ping failures
 RFAILCHK=0                      # count of route ping failures
 FAIL1=0                         # last failure time in seconds
 FAIL2=0                         # readable last failure time
-STATE1=`date '+%s'`             # state time in seconds
-STATE2=`date '+%d%b%g %H%M%S'`  # readable state time
+STATE1=$(date '+%s')            # state time in seconds
+STATE2=$(date '+%d%b%g %H%M%S') # readable state time
 
-if [ -f $STATFILE ]; then              # read existing status file
-  WANSTAT=`cat $STATFILE | cut -f1 -d' '`
-  FAIL2=`cat $STATFILE | cut -f7- -d' '`
+if [ -f $STATFILE ]; then # read existing status file
+  WANSTAT=$(cat $STATFILE | cut -f1 -d' ')
+  FAIL2=$(cat $STATFILE | cut -f7- -d' ')
   wanlogger $LOG_DEBUG "$BN: read $WANNAME WANSTAT $WANSTAT"
-  if [ $WANSTAT = "down" ]; then       # link down, set FAILCHK
+  if [ $WANSTAT = "down" ]; then # link down, set FAILCHK
     FAILCHK=$FAILCOUNT
-  elif [ $WANSTAT = "link" ]; then    # route down, set RFAILCHK
+  elif [ $WANSTAT = "link" ]; then # route down, set RFAILCHK
     RFAILCHK=$FAILCOUNT
-  elif [ $WANSTAT != "up" ] && [ $WANSTAT != "recovering" ]; then      # invalid status
+  elif [ $WANSTAT != "up" ] && [ $WANSTAT != "recovering" ]; then # invalid status
     unset WANSTAT
   fi
 fi
 
 wanlogger $LOG_DEBUG "$BN: starting $WANNAME, WANSTAT $WANSTAT"
 
-if [ -z $WANSTAT ]; then   # no existing WANSTAT, initialize
+if [ -z $WANSTAT ]; then # no existing WANSTAT, initialize
   wanlogger $LOG_DEBUG "$BN: initialize $WANNAME WANSTAT"
   WANSTAT="up"
-  echo "$WANSTAT $STATE1 $STATE2 init" > $STATFILE
+  echo "$WANSTAT $STATE1 $STATE2 init" >$STATFILE
 fi
 
-$CHANGEWAN &                     # check wan configuration
+$CHANGEWAN & # check wan configuration
 
 while true; do
-  date '+%s %d%b%g %H%M%S' > $HBFILE  # heartbeat for process monitor
+  date '+%s %d%b%g %H%M%S' >$HBFILE # heartbeat for process monitor
 
-  PCNT=`ping -c $PINGCOUNT -W $PINGCOUNT -w $PINGCOUNT -s $PINGSIZE -I $WANIF $WANIP \
-    2>/dev/null | awk '/packets received/ {print $4}'`
+  PCNT=$(ping -c $PINGCOUNT -W $PINGCOUNT -w $PINGCOUNT -s $PINGSIZE -I $WANIF $WANIP \
+    2>/dev/null | awk '/packets received/ {print $4}')
 
   if [ -z $PCNT ]; then
     PCNT=0
   fi
 
-  if [ $PCNT -ne $PINGCOUNT ]; then  # link ping failed
-    RCNT=0                           # mark route failed, no need to check
-  else                               # link ping test succeeded, check route
-    RCNT=$PINGCOUNT                  # set RCNT in case route check is disabled
+  if [ $PCNT -ne $PINGCOUNT ]; then # link ping failed
+    RCNT=0                          # mark route failed, no need to check
+  else                              # link ping test succeeded, check route
+    RCNT=$PINGCOUNT                 # set RCNT in case route check is disabled
 
     for ROUTEIP in $DNSLIST; do
       ip route add $ROUTEIP via $WANIP dev $WANIF
       sleep 1
-      RCNT=`ping -c $PINGCOUNT -W $PINGCOUNT -w $PINGCOUNT -I $WANIF $ROUTEIP 2>/dev/null | awk '/packets received/ {print $4}'`
+      RCNT=$(ping -c $PINGCOUNT -W $PINGCOUNT -w $PINGCOUNT -I $WANIF $ROUTEIP 2>/dev/null | awk '/packets received/ {print $4}')
       ip route del $ROUTEIP via $WANIP dev $WANIF
       sleep 1
 
       if [ $RCNT -eq $PINGCOUNT ]; then
-        break;
+        break
       else
-        wanlogger $LOG_DEBUG "$BN: $WANNAME $ROUTEIP route ping fail $RCNT #02 $WANNAME $(($PINGCOUNT-$RCNT)) 1"
+        wanlogger $LOG_DEBUG "$BN: $WANNAME $ROUTEIP route ping fail $RCNT #02 $WANNAME $(($PINGCOUNT - $RCNT)) 1"
       fi
     done
   fi
 
   PINGRATEADJ=0
 
-  if [ $PCNT -ne $PINGCOUNT ] || \
+  if [ $PCNT -ne $PINGCOUNT ] ||
     [ $RCNT -ne $PINGCOUNT ]; then # ping test failed
 
-    FAIL1=`date '+%s'`
-    FAIL2=`date '+%d%b%g %H%M%S'`
+    FAIL1=$(date '+%s')
+    FAIL2=$(date '+%d%b%g %H%M%S')
 
     if [ $PCNT -ne $PINGCOUNT ]; then
       PINGRATEADJ=1
       if [ $FAILCHK -lt $FAILCOUNT ]; then
-        FAILCHK=$(($FAILCHK+1))
+        FAILCHK=$(($FAILCHK + 1))
       fi
     fi
 
     if [ $RCNT -ne $PINGCOUNT ]; then
-      PINGRATEADJ=$(($PINGRATEADJ+$ROUTEIPCNT))
+      PINGRATEADJ=$(($PINGRATEADJ + $ROUTEIPCNT))
       if [ $RFAILCHK -lt $FAILCOUNT ]; then
-        RFAILCHK=$(($RFAILCHK+1))
+        RFAILCHK=$(($RFAILCHK + 1))
       fi
     fi
   fi
 
-  if [ $PCNT -ne $PINGCOUNT ]; then  # link ping failure
+  if [ $PCNT -ne $PINGCOUNT ]; then # link ping failure
     case $WANSTAT in
-      "up")
-        if [ $FAILCHK -eq $FAILCOUNT ]; then  # WAN link declared dead
-          WANSTAT="down"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_WARNING "$BN: $WANNAME $WANSTAT #03 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-          $SENDSTATUS "$WANNAME $WANSTAT" "$WANNAME $WANSTAT at $STATE2" &
-        else
-          wanlogger $LOG_INFO \
-          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #01 $WANNAME $(($PINGCOUNT-$PCNT)) $FAILCHK"
-        fi
-        ;;
-      "recovering"|"link")
-        if [ $FAILCHK -eq $FAILCOUNT ]; then  # WAN link declared dead
-          WANSTAT="down"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #03 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-        else
-          wanlogger $LOG_DEBUG \
-          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #02 $wANNAME $(($PINGCOUNT-$RCNT)) $RFAILCHK"
-        fi
-        ;;
-      "down")  # no action required
-        ;;
-      *)
-        wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-        rm -f $PIDFILE
-        exit 5
-        ;;
+    "up")
+      if [ $FAILCHK -eq $FAILCOUNT ]; then # WAN link declared dead
+        WANSTAT="down"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_WARNING "$BN: $WANNAME $WANSTAT #03 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+        $SENDSTATUS "$WANNAME $WANSTAT" "$WANNAME $WANSTAT at $STATE2" &
+      else
+        wanlogger $LOG_INFO \
+          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #01 $WANNAME $(($PINGCOUNT - $PCNT)) $FAILCHK"
+      fi
+      ;;
+    "recovering" | "link")
+      if [ $FAILCHK -eq $FAILCOUNT ]; then # WAN link declared dead
+        WANSTAT="down"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #03 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+      else
+        wanlogger $LOG_DEBUG \
+          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #02 $wANNAME $(($PINGCOUNT - $RCNT)) $RFAILCHK"
+      fi
+      ;;
+    "down") # no action required
+      ;;
+    *)
+      wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
+      rm -f $PIDFILE
+      exit 5
+      ;;
     esac
-  elif  [ $RCNT -ne $PINGCOUNT ]; then     # route ping failed
+  elif [ $RCNT -ne $PINGCOUNT ]; then # route ping failed
     if [ $PCNT -eq $PINGCOUNT ] && [ $FAILCHK -gt 0 ]; then
-      FAILCHK=$(($FAILCHK-1))
+      FAILCHK=$(($FAILCHK - 1))
     fi
 
     case $WANSTAT in
-      "up")
-        if [ $RFAILCHK -eq $FAILCOUNT ]; then  # WAN route declared dead
-          WANSTAT="link"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_WARNING "$BN: $WANNAME $WANSTAT #04 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-          $SENDSTATUS "$WANNAME $WANSTAT" "$WANNAME $WANSTAT at $STATE2" &
-        else
-          wanlogger $LOG_INFO \
-          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #02 $WANNAME $((PINGCOUNT-$RCNT)) $RFAILCHK"
-        fi
-        ;;
-      "recovering")
-        if [ $RFAILCHK -eq $FAILCOUNT ]; then  # WAN route declared dead
-          WANSTAT="link"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #04 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-        else
-          wanlogger $LOG_DEBUG \
-          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #02 $(($PINGCOUNT-$RCNT)) $RFAILCHK"
-        fi
-        ;;
-      "link")  # no action required
-        ;;
-      "down")
-        if [ $FAILCHK -eq 0 ]; then  # link online
-          WANSTAT="link"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #04 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-        else
-          wanlogger $LOG_DEBUG \
-          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #02 $WANNAME $(($PINGCOUNT-$RCNT)) $RFAILCHK"
-        fi
-        ;;
-      *)
-        wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-        rm -f $PIDFILE
-        exit 5
-        ;;
+    "up")
+      if [ $RFAILCHK -eq $FAILCOUNT ]; then # WAN route declared dead
+        WANSTAT="link"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_WARNING "$BN: $WANNAME $WANSTAT #04 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+        $SENDSTATUS "$WANNAME $WANSTAT" "$WANNAME $WANSTAT at $STATE2" &
+      else
+        wanlogger $LOG_INFO \
+          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #02 $WANNAME $((PINGCOUNT - $RCNT)) $RFAILCHK"
+      fi
+      ;;
+    "recovering")
+      if [ $RFAILCHK -eq $FAILCOUNT ]; then # WAN route declared dead
+        WANSTAT="link"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #04 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+      else
+        wanlogger $LOG_DEBUG \
+          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #02 $(($PINGCOUNT - $RCNT)) $RFAILCHK"
+      fi
+      ;;
+    "link") # no action required
+      ;;
+    "down")
+      if [ $FAILCHK -eq 0 ]; then # link online
+        WANSTAT="link"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #04 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+      else
+        wanlogger $LOG_DEBUG \
+          "$BN: ping fail $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK #02 $WANNAME $(($PINGCOUNT - $RCNT)) $RFAILCHK"
+      fi
+      ;;
+    *)
+      wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
+      rm -f $PIDFILE
+      exit 5
+      ;;
     esac
-  else                   # ping test succeeded
+  else # ping test succeeded
     if [ $PCNT -eq $PINGCOUNT ] && [ $FAILCHK -gt 0 ]; then
-      FAILCHK=$(($FAILCHK-1))
+      FAILCHK=$(($FAILCHK - 1))
     fi
 
     if [ $RCNT -eq $PINGCOUNT ] && [ $RFAILCHK -gt 0 ]; then
-      RFAILCHK=$(($RFAILCHK-1))
+      RFAILCHK=$(($RFAILCHK - 1))
     fi
 
     case $WANSTAT in
-      "up")  # no action required
-        ;;
-      "recovering")
-        if [ `date '+%s'` -gt $(($STATE1+$RESTOREDELAY)) ]; then # change to up
-          WANSTAT="up"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_NOTICE "$BN: $WANNAME $WANSTAT #06 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-          $SENDSTATUS "$WANNAME $WANSTAT" "$WANNAME $WANSTAT at $STATE2" &
-        else
-          wanlogger $LOG_DEBUG \
+    "up") # no action required
+      ;;
+    "recovering")
+      if [ $(date '+%s') -gt $(($STATE1 + $RESTOREDELAY)) ]; then # change to up
+        WANSTAT="up"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_NOTICE "$BN: $WANNAME $WANSTAT #06 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+        $SENDSTATUS "$WANNAME $WANSTAT" "$WANNAME $WANSTAT at $STATE2" &
+      else
+        wanlogger $LOG_DEBUG \
           "$BN: ping succeed $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK"
-        fi
-        ;;
-      "link")
-        if [ $FAILCHK -eq 0 ] && [ $RFAILCHK -eq 0 ]; then  # route recovering
-          WANSTAT="recovering"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #05 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-        else
-          wanlogger $LOG_DEBUG \
+      fi
+      ;;
+    "link")
+      if [ $FAILCHK -eq 0 ] && [ $RFAILCHK -eq 0 ]; then # route recovering
+        WANSTAT="recovering"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #05 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+      else
+        wanlogger $LOG_DEBUG \
           "$BN: ping succeed $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK"
-        fi
-        ;;
-      "down")
-        if [ $FAILCHK -eq 0 ] && [ $RFAILCHK -eq 0 ]; then  # route recovering
-          WANSTAT="recovering"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #05 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-        elif [ $FAILCHK -eq 0 ]; then  # WAN link up
-          WANSTAT="link"
-          STATE1=`date '+%s'`
-          STATE2=`date '+%d%b%g %H%M%S'`
-          wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #04 $WANNAME "
-          echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" > $STATFILE
-          $CHANGEWAN &
-        else
-          wanlogger $LOG_DEBUG \
+      fi
+      ;;
+    "down")
+      if [ $FAILCHK -eq 0 ] && [ $RFAILCHK -eq 0 ]; then # route recovering
+        WANSTAT="recovering"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #05 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+      elif [ $FAILCHK -eq 0 ]; then # WAN link up
+        WANSTAT="link"
+        STATE1=$(date '+%s')
+        STATE2=$(date '+%d%b%g %H%M%S')
+        wanlogger $LOG_INFO "$BN: $WANNAME $WANSTAT #04 $WANNAME "
+        echo "$WANSTAT $STATE1 $STATE2 last failure $FAIL2" >$STATFILE
+        $CHANGEWAN &
+      else
+        wanlogger $LOG_DEBUG \
           "$BN: ping succeed $WANNAME $PCNT of $PINGCOUNT, $FAILCHK route $RCNT of $PINGCOUNT, $RFAILCHK"
-        fi
-        ;;
-      *)
-        wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
-        rm -f $PIDFILE
-        exit 5
-        ;;
+      fi
+      ;;
+    *)
+      wanlogger $LOG_ERR "$BN: Unknown $WANNAME WANSTAT $WANSTAT"
+      rm -f $PIDFILE
+      exit 5
+      ;;
     esac
   fi
 
@@ -322,4 +322,3 @@ rm -f $PIDFILE
 
 wanlogger $LOG_ERR "$BN: abnormal exit"
 exit 6
-

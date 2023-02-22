@@ -14,15 +14,15 @@ fi
 
 STATFILE=$TMPDIR/$STATROOT.$1
 
-if [ -f $STATFILE ]; then   # check that status file exists
-  WANSTAT=`cat $STATFILE | cut -f1 -d' '`
+if [ -f $STATFILE ]; then # check that status file exists
+  WANSTAT=$(cat $STATFILE | cut -f1 -d' ')
 
   if [ $WANSTAT = "recovering" ]; then
     PIDFILE=$PIDDIR/linkd${1}.pid
 
-    kill -0 `cat $PIDFILE` >/dev/null
-    if [ $? -eq 0 ]; then   # linkd found, okay to send SIGUSR1
-      kill -SIGUSR1 `cat $PIDFILE`
+    kill -0 $(cat $PIDFILE) >/dev/null
+    if [ $? -eq 0 ]; then # linkd found, okay to send SIGUSR1
+      kill -SIGUSR1 $(cat $PIDFILE)
       rm $STATFILE
       RETVAL=0
     else
@@ -39,4 +39,3 @@ else
 fi
 
 exit $RETVAL
-

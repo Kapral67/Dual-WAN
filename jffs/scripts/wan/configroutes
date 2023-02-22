@@ -26,94 +26,94 @@ fi
 tableroutes() {
   ip route delete default
 
-  TABLEROUTE=`ip route show table 100 | grep default`
+  TABLEROUTE=$(ip route show table 100 | grep default)
   if [ -n "$TABLEROUTE" ]; then
-    ROUTEIP=`echo $TABLEROUTE | cut -d ' ' -f3`
-    ROUTEIF=`echo $TABLEROUTE | cut -d ' ' -f5`
+    ROUTEIP=$(echo $TABLEROUTE | cut -d ' ' -f3)
+    ROUTEIF=$(echo $TABLEROUTE | cut -d ' ' -f5)
     ip route delete via $ROUTEIP dev $ROUTEIF table 100
   fi
 
-  TABLEROUTE=`ip route show table 200 | grep default`
+  TABLEROUTE=$(ip route show table 200 | grep default)
   if [ -n "$TABLEROUTE" ]; then
-    ROUTEIP=`echo $TABLEROUTE | cut -d ' ' -f3`
-    ROUTEIF=`echo $TABLEROUTE | cut -d ' ' -f5`
+    ROUTEIP=$(echo $TABLEROUTE | cut -d ' ' -f3)
+    ROUTEIF=$(echo $TABLEROUTE | cut -d ' ' -f5)
     ip route delete via $ROUTEIP dev $ROUTEIF table 200
   fi
 }
 
 case $1 in
-  "default" )
-    wanlogger $LOG_NOTICE "$BN: configuring $1 routing #07 $1 "
+"default")
+  wanlogger $LOG_NOTICE "$BN: configuring $1 routing #07 $1 "
 
-    tableroutes
+  tableroutes
 
-    ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
+  ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
 
-    ip rule add from $NET2 table 100
-    ip rule add from $NET3 table 100
-    ip rule add from $NET4 table 100
-    ip route add default via $(nvram get wan1_gateway) \
-      dev $(nvram get wan1_ifname) table 100
+  ip rule add from $NET2 table 100
+  ip rule add from $NET3 table 100
+  ip rule add from $NET4 table 100
+  ip route add default via $(nvram get wan1_gateway) \
+    dev $(nvram get wan1_ifname) table 100
 
-    ip rule add from $NET1 table 200
-    ip route add default via $(nvram get wan2_gateway) \
-      dev $(nvram get wan2_ifname) table 200
+  ip rule add from $NET1 table 200
+  ip route add default via $(nvram get wan2_gateway) \
+    dev $(nvram get wan2_ifname) table 200
 
-    RETVAL=0
-    ;;
-  "wan1" )
-    wanlogger $LOG_NOTICE "$BN: routing all traffic to $1 #07 $1 "
+  RETVAL=0
+  ;;
+"wan1")
+  wanlogger $LOG_NOTICE "$BN: routing all traffic to $1 #07 $1 "
 
-    tableroutes
+  tableroutes
 
-    ip rule del from $NET3 table 100
-    ip rule del from $NET4 table 100
-    ip rule del from $NET2 table 100
-    ip rule del from $NET1 table 200
+  ip rule del from $NET3 table 100
+  ip rule del from $NET4 table 100
+  ip rule del from $NET2 table 100
+  ip rule del from $NET1 table 200
 
-    ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
-    ip route add default via $(nvram get wan1_gateway) \
-      dev $(nvram get wan1_ifname) table 100
-    ip route add default via $(nvram get wan1_gateway) \
-      dev $(nvram get wan1_ifname) table 200
+  ip route add default via $(nvram get wan1_gateway) dev $(nvram get wan1_ifname)
+  ip route add default via $(nvram get wan1_gateway) \
+    dev $(nvram get wan1_ifname) table 100
+  ip route add default via $(nvram get wan1_gateway) \
+    dev $(nvram get wan1_ifname) table 200
 
-    RETVAL=0
-    ;;
-  "wan2" )
-    wanlogger $LOG_NOTICE "$BN: routing all traffic to $1 #07 $1 "
+  RETVAL=0
+  ;;
+"wan2")
+  wanlogger $LOG_NOTICE "$BN: routing all traffic to $1 #07 $1 "
 
-    tableroutes
+  tableroutes
 
-    ip rule del from $NET3 table 100
-    ip rule del from $NET4 table 100
-    ip rule del from $NET2 table 100
-    ip rule del from $NET1 table 200
+  ip rule del from $NET3 table 100
+  ip rule del from $NET4 table 100
+  ip rule del from $NET2 table 100
+  ip rule del from $NET1 table 200
 
-    ip route add default via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname)
-    ip route add default via $(nvram get wan2_gateway) \
-      dev $(nvram get wan2_ifname) table 100
-    ip route add default via $(nvram get wan2_gateway) \
-      dev $(nvram get wan2_ifname) table 200
+  ip route add default via $(nvram get wan2_gateway) dev $(nvram get wan2_ifname)
+  ip route add default via $(nvram get wan2_gateway) \
+    dev $(nvram get wan2_ifname) table 100
+  ip route add default via $(nvram get wan2_gateway) \
+    dev $(nvram get wan2_ifname) table 200
 
-    RETVAL=0
-    ;;
-  "down" )
-    wanlogger $LOG_WARNING "$BN: no wan up, deleting routes"
+  RETVAL=0
+  ;;
+"down")
+  wanlogger $LOG_WARNING "$BN: no wan up, deleting routes"
 
-    tableroutes
+  tableroutes
 
-    ip rule del from $NET3 table 100
-    ip rule del from $NET4 table 100
-    ip rule del from $NET2 table 100
-    ip rule del from $NET1 table 200
+  ip rule del from $NET3 table 100
+  ip rule del from $NET4 table 100
+  ip rule del from $NET2 table 100
+  ip rule del from $NET1 table 200
 
-    RETVAL=0
-    ;;
-  * )
-    echo "$BN: Unrecognized selection: $1"
-    wanlogger $LOG_ERR "$BN: Unrecognized selection: $1"
-    RETVAL=1
-    ;;
+  RETVAL=0
+  ;;
+*)
+  echo "$BN: Unrecognized selection: $1"
+  wanlogger $LOG_ERR "$BN: Unrecognized selection: $1"
+  RETVAL=1
+  ;;
 esac
 
 if [ $RETVAL -eq 0 ]; then
@@ -124,7 +124,7 @@ if [ $RETVAL -eq 0 ]; then
 
   ip route flush cache
 
-  echo "$1 `date '+%d%b%g %H%M%S'`" > $ROUTESTATFILE
+  echo "$1 $(date '+%d%b%g %H%M%S')" >$ROUTESTATFILE
 
   wanlogger $LOG_NOTICE "$BN: route set to $1"
 
@@ -132,4 +132,3 @@ if [ $RETVAL -eq 0 ]; then
 fi
 
 exit $RETVAL
-

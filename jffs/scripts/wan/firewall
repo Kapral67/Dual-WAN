@@ -19,74 +19,74 @@ wanlogger $LOG_DEBUG "$BN: start"
 #apply simple forward rules
 
 for WAN in $WANLIST; do
-    wanlogger $LOG_DEBUG "$BN: configuring firewall PREROUTING for $WAN"
+  wanlogger $LOG_DEBUG "$BN: configuring firewall PREROUTING for $WAN"
 
-    for RULE in $(nvram get forward_spec); do
-      wanlogger $LOG_DEBUG "$BN: $WAN forward_spec $RULE"
-      FROM=`echo $RULE | cut -d '>' -f 1`
-      TO=`echo $RULE | cut -d '>' -f 2`
-      STATE=`echo $FROM | cut -d ':' -f 2`
-      PROTO=`echo $FROM | cut -d ':' -f 3`
-      SPORT=`echo $FROM | cut -d ':' -f 4`
-      DEST=`echo $TO | cut -d ':' -f 1`
-      DPORT=`echo $TO | cut -d ':' -f 2`
+  for RULE in $(nvram get forward_spec); do
+    wanlogger $LOG_DEBUG "$BN: $WAN forward_spec $RULE"
+    FROM=$(echo $RULE | cut -d '>' -f 1)
+    TO=$(echo $RULE | cut -d '>' -f 2)
+    STATE=$(echo $FROM | cut -d ':' -f 2)
+    PROTO=$(echo $FROM | cut -d ':' -f 3)
+    SPORT=$(echo $FROM | cut -d ':' -f 4)
+    DEST=$(echo $TO | cut -d ':' -f 1)
+    DPORT=$(echo $TO | cut -d ':' -f 2)
 
-      if [ "$STATE" = "on" ]; then
-         if [ "$PROTO" = "both" ]; then
-           iptables -A PREROUTING -t nat -p udp -d $(nvram get ${WAN}_ipaddr) \
-             --dport $SPORT -j DNAT --to $DEST:$DPORT
-           iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
-             --dport $SPORT -j DNAT --to $DEST:$DPORT
-         else
-           iptables -A PREROUTING -t nat -p $PROTO -d $(nvram get ${WAN}_ipaddr) \
-             --dport $SPORT -j DNAT --to $DEST:$DPORT
-         fi
+    if [ "$STATE" = "on" ]; then
+      if [ "$PROTO" = "both" ]; then
+        iptables -A PREROUTING -t nat -p udp -d $(nvram get ${WAN}_ipaddr) \
+          --dport $SPORT -j DNAT --to $DEST:$DPORT
+        iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
+          --dport $SPORT -j DNAT --to $DEST:$DPORT
+      else
+        iptables -A PREROUTING -t nat -p $PROTO -d $(nvram get ${WAN}_ipaddr) \
+          --dport $SPORT -j DNAT --to $DEST:$DPORT
       fi
-    done
-
-    #apply range forward rules
-    for RULE in $(nvram get forward_port); do
-      wanlogger $LOG_DEBUG "$BN: $WAN forward_port $RULE"
-
-      FROM=`echo $RULE | cut -d '>' -f 1`
-      TO=`echo $RULE | cut -d '>' -f 2`
-      STATE=`echo $FROM | cut -d ':' -f 2`
-      PROTO=`echo $FROM | cut -d ':' -f 3`
-      SPORT=`echo $FROM | cut -d ':' -f 4`
-      EPORT=`echo $FROM | cut -d ':' -f 5`
-
-      if [ "$STATE" = "on" ]; then
-        if [ "$PROTO" = "both" ]; then
-          iptables -A PREROUTING -t nat -p udp -d $(nvram get ${WAN}_ipaddr) \
-            --dport $SPORT:$EPORT -j DNAT --to $TO
-          iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
-            --dport $SPORT:$EPORT -j DNAT --to $TO
-        else
-          iptables -A PREROUTING -t nat -p $PROTO -d $(nvram get ${WAN}_ipaddr) \
-            --dport $SPORT:$EPORT -j DNAT --to $TO
-        fi
-      fi
-    done
-
-    iptables -A PREROUTING -t nat -p icmp -d $(nvram get ${WAN}_ipaddr) -j DNAT \
-      --to $(nvram get lan_ipaddr)
-
-    if [ $(nvram get remote_management) -eq 1 ]; then
-      iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
-        --dport $(nvram get http_wanport) -j DNAT \
-        --to $(nvram get lan_ipaddr):$(nvram get http_lanport)
     fi
+  done
 
-    #if [ $(nvram get dmz_enable) -eq 1 ]; then
-    #  DMZ_IP=$(nvram get lan_ipaddr | sed -r 's/[0-9]+$//')$(nvram get dmz_ipaddr)
-    #  iptables -A PREROUTING -t nat -d $(nvram get ${WAN}_ipaddr) -j DNAT \
-    #    --to $DMZ_IP
-    #fi
+  #apply range forward rules
+  for RULE in $(nvram get forward_port); do
+    wanlogger $LOG_DEBUG "$BN: $WAN forward_port $RULE"
 
-    iptables -A PREROUTING -t nat --dest $(nvram get ${WAN}_ipaddr) -j TRIGGER \
-      --trigger-type dnat
-    iptables -A FORWARD -i $(nvram get ${WAN}_ifname) -o $(nvram get lan_ifname) \
-      -j TRIGGER --trigger-type in
+    FROM=$(echo $RULE | cut -d '>' -f 1)
+    TO=$(echo $RULE | cut -d '>' -f 2)
+    STATE=$(echo $FROM | cut -d ':' -f 2)
+    PROTO=$(echo $FROM | cut -d ':' -f 3)
+    SPORT=$(echo $FROM | cut -d ':' -f 4)
+    EPORT=$(echo $FROM | cut -d ':' -f 5)
+
+    if [ "$STATE" = "on" ]; then
+      if [ "$PROTO" = "both" ]; then
+        iptables -A PREROUTING -t nat -p udp -d $(nvram get ${WAN}_ipaddr) \
+          --dport $SPORT:$EPORT -j DNAT --to $TO
+        iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
+          --dport $SPORT:$EPORT -j DNAT --to $TO
+      else
+        iptables -A PREROUTING -t nat -p $PROTO -d $(nvram get ${WAN}_ipaddr) \
+          --dport $SPORT:$EPORT -j DNAT --to $TO
+      fi
+    fi
+  done
+
+  iptables -A PREROUTING -t nat -p icmp -d $(nvram get ${WAN}_ipaddr) -j DNAT \
+    --to $(nvram get lan_ipaddr)
+
+  if [ $(nvram get remote_management) -eq 1 ]; then
+    iptables -A PREROUTING -t nat -p tcp -d $(nvram get ${WAN}_ipaddr) \
+      --dport $(nvram get http_wanport) -j DNAT \
+      --to $(nvram get lan_ipaddr):$(nvram get http_lanport)
+  fi
+
+  #if [ $(nvram get dmz_enable) -eq 1 ]; then
+  #  DMZ_IP=$(nvram get lan_ipaddr | sed -r 's/[0-9]+$//')$(nvram get dmz_ipaddr)
+  #  iptables -A PREROUTING -t nat -d $(nvram get ${WAN}_ipaddr) -j DNAT \
+  #    --to $DMZ_IP
+  #fi
+
+  iptables -A PREROUTING -t nat --dest $(nvram get ${WAN}_ipaddr) -j TRIGGER \
+    --trigger-type dnat
+  iptables -A FORWARD -i $(nvram get ${WAN}_ifname) -o $(nvram get lan_ifname) \
+    -j TRIGGER --trigger-type in
 done
 
 #DD-WRT END
@@ -118,7 +118,7 @@ for WAN in $WANLIST; do
     --set-mark 0x${I}00
   iptables -t nat -A POSTROUTING -o $(nvram get ${WAN}_ifname) -j SPOOF_ETH${I}
 
-  I=$(($I+1))
+  I=$(($I + 1))
 done
 
 iptables -t mangle -A POSTROUTING -j CONNMARK --save-mark
@@ -130,9 +130,8 @@ iptables -t mangle -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED \
   -j CONNMARK --restore-mark
 
 RP_PATH=/proc/sys/net/ipv4/conf
-for IFACE in `ls $RP_PATH`; do
-    echo 0 > $RP_PATH/$IFACE/rp_filter
+for IFACE in $(ls $RP_PATH); do
+  echo 0 >$RP_PATH/$IFACE/rp_filter
 done
 
 wanlogger $LOG_DEBUG "$BN: exit"
-

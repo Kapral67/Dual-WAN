@@ -24,31 +24,31 @@ ln /jffs/scripts/wan/linkdupdate /jffs/etc/config/linkdupdate.ipup
 COMMITNEEDED=0
 I=1
 for WAN in $WANLIST; do
-  IFNAME=`echo $DHCPLIST | cut -d ' ' -f $I`
-  if [ "`nvram get ${WAN}_ifname`" != "$IFNAME" ]; then
+  IFNAME=$(echo $DHCPLIST | cut -d ' ' -f $I)
+  if [ "$(nvram get ${WAN}_ifname)" != "$IFNAME" ]; then
     nvram set ${WAN}_ifname="$IFNAME"
     COMMITNEEDED=1
   fi
   unset IFNAME
-  I=$(($I+1))
+  I=$(($I + 1))
 done
 unset I
-if [ "`nvram get wan_dns`" != "$DNSLIST" ]; then
+if [ "$(nvram get wan_dns)" != "$DNSLIST" ]; then
   nvram set wan_dns="$DNSLIST"
   COMMITNEEDED=1
 fi
-if [ "`nvram get ntp_server`" != "$NTPIP" ]; then
+if [ "$(nvram get ntp_server)" != "$NTPIP" ]; then
   nvram set ntp_server="$NTPIP"
   COMMITNEEDED=1
 fi
-printf "* * * * * root /jffs/scripts/wan/procmon\n0 10 * * * root /jffs/scripts/wan/clockupdate\n0 11 * * * root /jffs/scripts/wan/logwatch\n0 0,3,6,9,12,15,18,21 * * * root /jffs/scripts/wan/apprestart\n" > /tmp/cron
-if [ "`nvram get cron_jobs`" != "`cat /tmp/cron`" ]; then
-  nvram set cron_jobs="`cat /tmp/cron`"
+printf "* * * * * root /jffs/scripts/wan/procmon\n0 10 * * * root /jffs/scripts/wan/clockupdate\n0 11 * * * root /jffs/scripts/wan/logwatch\n0 0,3,6,9,12,15,18,21 * * * root /jffs/scripts/wan/apprestart\n" >/tmp/cron
+if [ "$(nvram get cron_jobs)" != "$(cat /tmp/cron)" ]; then
+  nvram set cron_jobs="$(cat /tmp/cron)"
   COMMITNEEDED=1
 fi
-printf "/jffs/scripts/wan/firewall\n/jffs/scripts/wan/route\n" > /tmp/fw
-if [ "`nvram get rc_firewall`" != "`cat /tmp/fw`" ]; then
-  nvram set rc_firewall="`cat /tmp/fw`"
+printf "/jffs/scripts/wan/firewall\n/jffs/scripts/wan/route\n" >/tmp/fw
+if [ "$(nvram get rc_firewall)" != "$(cat /tmp/fw)" ]; then
+  nvram set rc_firewall="$(cat /tmp/fw)"
   COMMITNEEDED=1
 fi
 if [ $COMMITNEEDED -ne 0 ]; then

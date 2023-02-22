@@ -1,9 +1,9 @@
 #!/bin/sh
 sleep 30
 
-udhcpc -i `nvram get wan1_ifname` -p /var/run/udhcpc-wan1.pid -s /jffs/scripts/wan/udhcpc-wan1
+udhcpc -i $(nvram get wan1_ifname) -p /var/run/udhcpc-wan1.pid -s /jffs/scripts/wan/udhcpc-wan1
 sleep 5
-udhcpc -i `nvram get wan2_ifname` -p /var/run/udhcpc-wan2.pid -s /jffs/scripts/wan/udhcpc-wan2
+udhcpc -i $(nvram get wan2_ifname) -p /var/run/udhcpc-wan2.pid -s /jffs/scripts/wan/udhcpc-wan2
 sleep 5
 /jffs/scripts/wan/firewall
 /jffs/scripts/wan/route
@@ -12,11 +12,11 @@ sleep 5
 /jffs/scripts/wan/monitord &
 
 # Adding my personal certifcate for https
-if [ -f `nvram get cert_pem` ]; then
-  if [ -f `nvram get key_pem` ]; then
+if [ -f $(nvram get cert_pem) ]; then
+  if [ -f $(nvram get key_pem) ]; then
     stopservice httpd
-    mount -o bind `nvram get cert_pem` /etc/cert.pem
-    mount -o bind `nvram get key_pem` /etc/key.pem
+    mount -o bind $(nvram get cert_pem) /etc/cert.pem
+    mount -o bind $(nvram get key_pem) /etc/key.pem
     startservice httpd
   fi
 fi
