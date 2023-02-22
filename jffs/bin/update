@@ -16,7 +16,7 @@ tar xf scripts.tar
 rm -f scripts.tar
 
 rm -f /jffs/etc/config/linkdupdate.ipup
-ln /jffs/scripts/wan/linkdupate /jffs/etc/config/linkdupdate.ipup
+ln /jffs/scripts/wan/linkdupdate /jffs/etc/config/linkdupdate.ipup
 
 . /jffs/scripts/wan/global
 
