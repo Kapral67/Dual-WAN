@@ -18,9 +18,6 @@ rm -f scripts.tar
 rm -f /jffs/etc/config/linkdupdate.ipup
 ln /jffs/scripts/wan/linkdupdate /jffs/etc/config/linkdupdate.ipup
 
-rm -f /jffs/etc/config/linkdupdate.if
-ln /jffs/scripts/wan/linkdupdate /jffs/etc/config/linkdupdate.if
-
 . /jffs/scripts/wan/global
 
 # set nvram vars
