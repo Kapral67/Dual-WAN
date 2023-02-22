@@ -18,8 +18,8 @@
 #FILELEVEL=$LOGLEVEL
 
 if [ $# -ne 1 ]; then
-  echo "Usage: $BN <default|wan1|wan2>"
-  wanlogger $LOG_ERR "Usage: $BN <default|wan1|wan2>"
+  echo "Usage: $BN <default|wan1|wan2|down>"
+  wanlogger $LOG_ERR "Usage: $BN <default|wan1|wan2|down>"
   exit 1
 fi
 
@@ -59,8 +59,6 @@ case $1 in
     ip route add default via $(nvram get wan2_gateway) \
       dev $(nvram get wan2_ifname) table 200
 
-    ip route flush cache
-
     RETVAL=0
     ;;
   "wan1" )
@@ -78,8 +76,6 @@ case $1 in
       dev $(nvram get wan1_ifname) table 100
     ip route add default via $(nvram get wan1_gateway) \
       dev $(nvram get wan1_ifname) table 200
-
-    ip route flush cache
 
     RETVAL=0
     ;;
@@ -99,7 +95,17 @@ case $1 in
     ip route add default via $(nvram get wan2_gateway) \
       dev $(nvram get wan2_ifname) table 200
 
-    ip route flush cache
+    RETVAL=0
+    ;;
+  "down" )
+    wanlogger $LOG_WARNING "$BN: no wan up, deleting routes"
+
+    tableroutes
+
+    ip rule del from $NET3 table 100
+    ip rule del from $NET4 table 100
+    ip rule del from $NET2 table 100
+    ip rule del from $NET1 table 200
 
     RETVAL=0
     ;;
