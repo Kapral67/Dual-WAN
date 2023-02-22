@@ -7,9 +7,10 @@ udhcpc -i $(nvram get wan2_ifname) -p /var/run/udhcpc-wan2.pid -s /jffs/scripts/
 sleep 5
 /jffs/scripts/wan/firewall
 /jffs/scripts/wan/route
-/jffs/scripts/wan/clockupdate
-/jffs/scripts/dnsupdate
 /jffs/scripts/wan/monitord &
+sleep 1
+/jffs/scripts/wan/clockupdate
+/jffs/scripts/wan/dnsupdate
 
 # Adding my personal certifcate for https
 if [ -f $(nvram get cert_pem) ]; then

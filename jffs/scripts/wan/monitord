@@ -93,7 +93,7 @@ while true; do
       wanlogger $LOG_WARNING "$BN: heartbeat fail for linkd ${WAN}, killing..."
       kill -9 $LINKDPID
       wanlogger $LOG_WARNING "$BN: restarting linkd..."
-      $WANDIR/linkd $WANNAME &
+      $WANDIR/linkd $WAN &
     fi
   done
 
