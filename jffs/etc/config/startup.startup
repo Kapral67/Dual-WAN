@@ -11,13 +11,11 @@ sleep 5
 sleep 5
 
 # Adding my personal certifcate for https
-if [ -f $(nvram get cert_pem) ]; then
-  if [ -f $(nvram get key_pem) ]; then
+if [ -f "$(nvram get cert_pem)" ] && [ -f "$(nvram get key_pem)" ]; then
     stopservice httpd
     mount -o bind $(nvram get cert_pem) /etc/cert.pem
     mount -o bind $(nvram get key_pem) /etc/key.pem
     startservice httpd
-  fi
 fi
 
 # entware, unneeded just nice to have
