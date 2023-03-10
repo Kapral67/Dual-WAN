@@ -131,6 +131,7 @@ while true; do
         ip route list | grep default >/dev/null 2>&1
         if [ $? -gt 0 ]; then
           $CONFIGROUTES down
+          break
         fi
       fi
 
