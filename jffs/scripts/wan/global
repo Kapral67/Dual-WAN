@@ -32,6 +32,9 @@ DHCPLIST="vlan2 vlan3" # list of DHCP VLANs
 
 DNSLIST="1.1.1.1 9.9.9.9 208.67.222.222"
 
+ROUTEIPwan1=$DNSLIST
+ROUTEIPwan2="1.0.0.1 8.8.8.8 208.67.220.220"
+
 NTPIP="128.138.140.211" # utcnist3.colorado.edu
 
 #########################################################################
