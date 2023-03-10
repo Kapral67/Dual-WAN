@@ -18,7 +18,7 @@ CROND=cron       # name cron daemon, e.g., cron, crond
 # Parameters: <WAN name> <ping rate> <ping count> <packet size> <fail count> <restore delay>
 #NOTE: CONFIG suffix must match WANLIST below
 
-CONFIGwan1="wan1 1 5 56 4 180" # linkd config parameters for wan1
+CONFIGwan1="wan1 1 5 56 3 300" # linkd config parameters for wan1
 CONFIGwan2="wan2 1 10 56 9 90" # linkd config parameters for wan2
 
 #NOTE: HBRATE suffix must match WANLIST below
