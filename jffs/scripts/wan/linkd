@@ -107,7 +107,7 @@ $CHANGEWAN & # check wan configuration
 while true; do
   date '+%s %d%b%g %H%M%S' >$HBFILE # heartbeat for process monitor
 
-  PCNT=$(ping -c $PINGCOUNT -W $PINGRATE -w $(expr $(expr $PINGCOUNT \+ 1) \* $PINGRATE) -i $PINGRATE -s $PINGSIZE -I $WANIF $WANIP 2>/dev/null | awk '/packets received/ {print $4}')
+  PCNT=$(ping -q -A -c $PINGCOUNT -W $PINGRATE -w $(expr $(expr $PINGCOUNT \+ 1) \* $PINGRATE) -s $PINGSIZE -I $WANIF $WANIP 2>/dev/null | awk '/packets received/ {print $4}')
 
   if [ -z $PCNT ]; then
     PCNT=0
@@ -121,11 +121,11 @@ while true; do
     for ROUTEIP in $DNSLIST; do
       ip route add $ROUTEIP via $WANIP dev $WANIF
       sleep 1
-      RCNT=$(ping -c $PINGCOUNT -W $PINGRATE -w $(expr $(expr $PINGCOUNT \+ 1) \* $PINGRATE) -i $PINGRATE -I $WANIF $ROUTEIP 2>/dev/null | awk '/packets received/ {print $4}')
+      RCNT=$(ping -q -A -c $PINGCOUNT -W $PINGRATE -w $(expr $(expr $PINGCOUNT \+ 1) \* $PINGRATE) -I $WANIF $ROUTEIP 2>/dev/null | awk '/packets received/ {print $4}')
       ip route del $ROUTEIP via $WANIP dev $WANIF
       sleep 1
 
-      if [ $RCNT -eq $PINGCOUNT ]; then
+      if [ $RCNT -gt $FAILCOUNT ]; then
         break
       else
         wanlogger $LOG_DEBUG "$BN: $WANNAME $ROUTEIP route ping fail $RCNT #02 $WANNAME $(($PINGCOUNT - $RCNT)) 1"
@@ -314,7 +314,7 @@ while true; do
     esac
   fi
 
-  sleep $RESTOREDELAY
+  sleep $PINGRATE
 done
 
 rm -f $PIDFILE
