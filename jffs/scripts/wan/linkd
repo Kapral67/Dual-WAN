@@ -27,14 +27,15 @@ PIDFILE=$PIDDIR/linkd${WANNAME}.pid # PID file
 readiface() {
   . /jffs/scripts/wan/global
 
-  WANCFG=$(eval echo $"CONFIG${WANNAME}")         # read linkd configuration
-  PINGRATE=$(echo $WANCFG | cut -f2 -d' ')        # time delay between pings (sec)
-  PINGCOUNT=$(echo $WANCFG | cut -f3 -d' ')       # number of pings for each check
-  PINGSIZE=$(echo $WANCFG | cut -f4 -d' ')        # size of ICMP packets in bytes
-  FAILCOUNT=$(echo $WANCFG | cut -f5 -d' ')       # number of failures to down
-  RESTOREDELAY=$(echo $WANCFG | cut -f6 -d' ')    # failback delay time (sec)
-  WANIF=$(nvram get ${WANNAME}_ifname)            # WAN target interface
-  ROUTEIPCNT=$(echo ${ROUTEIP}${WANNAME} | wc -w) # count of route IP addresses
+  WANCFG=$(eval echo $"CONFIG${WANNAME}")      # read linkd configuration
+  PINGRATE=$(echo $WANCFG | cut -f2 -d' ')     # time delay between pings (sec)
+  PINGCOUNT=$(echo $WANCFG | cut -f3 -d' ')    # number of pings for each check
+  PINGSIZE=$(echo $WANCFG | cut -f4 -d' ')     # size of ICMP packets in bytes
+  FAILCOUNT=$(echo $WANCFG | cut -f5 -d' ')    # number of failures to down
+  RESTOREDELAY=$(echo $WANCFG | cut -f6 -d' ') # failback delay time (sec)
+  WANIF=$(nvram get ${WANNAME}_ifname)         # WAN target interface
+  ROUTEIPS=$(eval echo $"ROUTEIP${WANNAME}")
+  ROUTEIPCNT=$(echo $ROUTEIPS | wc -w) # count of route IP addresses
   wanlogger $LOG_INFO "$BN: $WANNAME configuration $PINGRATE $PINGCOUNT $PINGSIZE $FAILCOUNT $RESTOREDELAY #09 linkd"
   WANIP=$(nvram get ${WANNAME}_ping) # WAN target IP address
   if [ -z $WANIP ]; then             # Check ping IP override
@@ -118,7 +119,7 @@ while true; do
   else                              # link ping test succeeded, check route
     RCNT=$PINGCOUNT                 # set RCNT in case route check is disabled
 
-    for ROUTEIP in ${ROUTEIP}${WANNAME}; do
+    for ROUTEIP in $ROUTEIPS; do
       ip route add $ROUTEIP via $WANIP dev $WANIF
       sleep 1
       ping -q -A -c $PINGCOUNT -W $PINGRATE -w $(expr $(expr $PINGCOUNT \+ 1) \* $PINGRATE) -I $WANIF $ROUTEIP 2>/dev/null >"${TMPDIR}/${WANNAME}.ping"
@@ -128,8 +129,9 @@ while true; do
       sleep 1
 
       if [ $TMP -gt 0 ]; then
+        ROUTESTAT=$(cat $TMPDIR/$STATROOT.route | awk '{print $1}')
         ip route list | grep default >/dev/null 2>&1
-        if [ $? -gt 0 ]; then
+        if [ $? -gt 0 ] && [ $ROUTESTAT != "down" ]; then
           $CONFIGROUTES down
           break
         fi
