@@ -123,7 +123,7 @@ while true; do
       sleep 1
       ping -q -A -c $PINGCOUNT -W $PINGRATE -w $(expr $(expr $PINGCOUNT \+ 1) \* $PINGRATE) -I $WANIF $ROUTEIP 2>/dev/null >"${TMPDIR}/${WANNAME}.ping"
       TMP=$?
-      RCNT=$(cat ${TMPDIR}/${WANNAME}.ping | awk '/packets received/ {print $4}')
+      RCNT=$(cat "${TMPDIR}/${WANNAME}.ping" | awk '/packets received/ {print $4}')
       ip route del $ROUTEIP via $WANIP dev $WANIF
       sleep 1
 
