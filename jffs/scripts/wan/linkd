@@ -121,13 +121,25 @@ while true; do
     for ROUTEIP in ${ROUTEIP}${WANNAME}; do
       ip route add $ROUTEIP via $WANIP dev $WANIF
       sleep 1
-      RCNT=$(ping -q -A -c $PINGCOUNT -W $PINGRATE -w $(expr $(expr $PINGCOUNT \+ 1) \* $PINGRATE) -I $WANIF $ROUTEIP 2>/dev/null | awk '/packets received/ {print $4}')
+      ping -q -A -c $PINGCOUNT -W $PINGRATE -w $(expr $(expr $PINGCOUNT \+ 1) \* $PINGRATE) -I $WANIF $ROUTEIP 2>/dev/null >"${TMPDIR}/${WANNAME}.ping"
+      TMP=$?
+      RCNT=$(cat ${TMPDIR}/${WANNAME}.ping | awk '/packets received/ {print $4}')
       ip route del $ROUTEIP via $WANIP dev $WANIF
       sleep 1
+
+      if [ $TMP -gt 0 ]; then
+        ip route list | grep default >/dev/null 2>&1
+        if [ $? -gt 0 ]; then
+          $CONFIGROUTES down
+        fi
+      fi
 
       if [ $RCNT -gt $FAILCOUNT ]; then
         break
       else
+        if [ -z $RCNT ]; then
+          RCNT=0
+        fi
         wanlogger $LOG_DEBUG "$BN: $WANNAME $ROUTEIP route ping fail $RCNT #02 $WANNAME $(($PINGCOUNT - $RCNT)) 1"
       fi
     done
