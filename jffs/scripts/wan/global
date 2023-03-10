@@ -23,8 +23,8 @@ CONFIGwan2="wan2 5 10 56 9 $CHECKRATE" # linkd config parameters for wan2
 
 #NOTE: HBRATE suffix must match WANLIST below
 
-HBRATEwan1=$CHECKRATE # WAN heartbeat check rate (sec)
-HBRATEwan2=$CHECKRATE # WAN2 heartbeat check rate (sec)
+HBRATEwan1=180 # WAN heartbeat check rate (sec)
+HBRATEwan2=180 # WAN2 heartbeat check rate (sec)
 
 # each entry in WANLIST must correspond to an entry in DHCPLIST at same index
 WANLIST="wan1 wan2"    # list of monitored wan names
