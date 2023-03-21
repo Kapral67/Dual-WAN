@@ -16,11 +16,10 @@ wanlogger $LOG_DEBUG "$BN: start"
 
 #DD-WRT firewall rules #BEGIN
 
-#apply simple forward rules
-
 for WAN in $WANLIST; do
   wanlogger $LOG_DEBUG "$BN: configuring firewall PREROUTING for $WAN"
 
+  #apply simple forward rules
   for RULE in $(nvram get forward_spec); do
     wanlogger $LOG_DEBUG "$BN: $WAN forward_spec $RULE"
     FROM=$(echo $RULE | cut -d '>' -f 1)
@@ -68,6 +67,36 @@ for WAN in $WANLIST; do
     fi
   done
 
+  #apply port trigger rules
+  for RULE in $(nvram get port_trigger); do
+    wanlogger $LOG_DEBUG "$BN: $WAN port_trigger $RULE"
+
+    STATE=$(echo $RULE | cut -d ':' -f 2)
+
+    if [ "$STATE" = "on" ]; then
+      PROTO=$(echo $RULE | cut -d ':' -f 3)
+      SPEC=$(echo $RULE | cut -d ':' -f 4)
+      FROM=$(echo $SPEC | cut -d '>' -f 1)
+      TO=$(echo $SPEC | cut -d '>' -f 2)
+      FSPORT=$(echo $FROM | cut -d '-' -f 1)
+      FEPORT=$(echo $FROM | cut -d '-' -f 2)
+      TSPORT=$(echo $TO | cut -d '-' -f 1)
+      TEPORT=$(echo $TO | cut -d '-' -f 2)
+
+      if [ "$PROTO" = "both" ]; then
+        # TCP
+        iptables -A trigger_out -p tcp --dport $FSPORT:$FEPORT -j TRIGGER --trigger-type out \
+          --trigger-proto all --trigger-match $FSPORT-$FEPORT --trigger-relate $TSPORT-$TEPORT
+        # UDP
+        iptables -A trigger_out -p udp --dport $FSPORT:$FEPORT -j TRIGGER --trigger-type out \
+          --trigger-proto all --trigger-match $FSPORT-$FEPORT --trigger-relate $TSPORT-$TEPORT
+      else
+        iptables -A trigger_out -p $PROTO -m $PROTO --dport $FSPORT:$FEPORT -j TRIGGER --trigger-type out \
+          --trigger-proto $PROTO --trigger-match $FSPORT-$FEPORT --trigger-relate $TSPORT-$TEPORT
+      fi
+    fi
+  done
+
   iptables -A PREROUTING -t nat -p icmp -d $(nvram get ${WAN}_ipaddr) -j DNAT \
     --to $(nvram get lan_ipaddr)
 
@@ -87,6 +116,7 @@ for WAN in $WANLIST; do
     --trigger-type dnat
   iptables -A FORWARD -i $(nvram get ${WAN}_ifname) -o $(nvram get lan_ifname) \
     -j TRIGGER --trigger-type in
+  iptables -A FORWARD -i $(nvram get lan_ifname) -j trigger_out
 done
 
 #DD-WRT END
