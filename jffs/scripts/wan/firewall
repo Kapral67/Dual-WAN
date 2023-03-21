@@ -84,12 +84,12 @@ for WAN in $WANLIST; do
 
   iptables -A PREROUTING -t nat --dest $(nvram get ${WAN}_ipaddr) -j TRIGGER \
     --trigger-type dnat
-  # iptables -A FORWARD -i $(nvram get ${WAN}_ifname) -o $(nvram get lan_ifname) \
-  #   -j TRIGGER --trigger-type in
-  iptables -A FORWARD -i $(nvram get lan_ifname) -j trigger_out
+  iptables -A FORWARD -i $(nvram get ${WAN}_ifname) -o $(nvram get lan_ifname) \
+    -j TRIGGER --trigger-type in
 done
 
 #apply port trigger rules
+iptables -A FORWARD -i $(nvram get lan_ifname) -j trigger_out
 for RULE in $(nvram get port_trigger); do
   wanlogger $LOG_DEBUG "$BN: $WAN port_trigger $RULE"
 
